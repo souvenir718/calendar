@@ -2,12 +2,35 @@
 
 import { useState } from "react";
 import type { Schedule } from "@/types/schedule";
+import type { UpdateScheduleInput } from "@/lib/scheduleApi";
+import { CategorySelect } from "@/components/CategorySelect";
 
+const CATEGORY_DISPLAY: Record<
+  NonNullable<Schedule["category"]>,
+  { label: string; className: string }
+> = {
+  DAY_OFF: {
+    label: "연차",
+    className: "bg-red-50 text-red-600 border border-red-100",
+  },
+  IMPORTANT: {
+    label: "중요",
+    className: "bg-amber-50 text-amber-600 border border-amber-100",
+  },
+  MEETING: {
+    label: "미팅",
+    className: "bg-indigo-50 text-indigo-600 border border-indigo-100",
+  },
+  OTHER: {
+    label: "기타",
+    className: "bg-slate-50 text-slate-600 border border-slate-200",
+  },
+};
 export type ScheduleDetailModalProps = {
   schedule: Schedule;
   onClose: () => void;
   onDelete: () => void | Promise<void>;
-  onUpdate?: (updated: Schedule) => void | Promise<unknown>;
+  onUpdate?: (updated: UpdateScheduleInput) => void | Promise<unknown>;
 };
 
 export function ScheduleDetailModal({
@@ -22,6 +45,14 @@ export function ScheduleDetailModal({
   const [time, setTime] = useState(schedule.time ?? "");
   const [description, setDescription] = useState(schedule.description ?? "");
   const [saving, setSaving] = useState(false);
+  const [category, setCategory] = useState<Schedule["category"]>(
+    schedule.category ?? "OTHER",
+  );
+
+  const categoryKey = (schedule.category ?? "OTHER") as NonNullable<
+    Schedule["category"]
+  >;
+  const categoryMeta = CATEGORY_DISPLAY[categoryKey];
 
   const handleStartEdit = () => {
     setIsEditing(true);
@@ -33,6 +64,7 @@ export function ScheduleDetailModal({
     setDate(schedule.date ?? "");
     setTime(schedule.time ?? "");
     setDescription(schedule.description ?? "");
+    setCategory(schedule.category ?? "OTHER");
   };
 
   const handleSave = async () => {
@@ -48,11 +80,12 @@ export function ScheduleDetailModal({
 
     setSaving(true);
     await onUpdate({
-      ...schedule,
+      id: schedule.id,
       title: trimmedTitle,
       date,
       time: time || undefined,
       description: description || undefined,
+      category,
     });
     setSaving(false);
     setIsEditing(false);
@@ -81,7 +114,22 @@ export function ScheduleDetailModal({
         <div className="p-4 space-y-4 text-sm">
           {/* 제목 영역 */}
           <div className="space-y-1">
-            <div className="text-[11px] font-medium text-indigo-600">일정</div>
+            <div className="flex items-center justify-between">
+              <div className="text-[11px] font-medium text-indigo-600">
+                일정
+              </div>
+              {isEditing ? (
+                <CategorySelect value={category} onChange={setCategory} />
+              ) : (
+                <span
+                  className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                    categoryMeta?.className ?? ""
+                  }`}
+                >
+                  {categoryMeta?.label ?? "기타"}
+                </span>
+              )}
+            </div>
             {isEditing ? (
               <input
                 className="w-full text-base font-semibold text-gray-900 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"

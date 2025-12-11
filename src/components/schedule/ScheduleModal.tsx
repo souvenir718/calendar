@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import type { Schedule } from "@/types/schedule";
+import { CATEGORY_OPTIONS } from "@/constants/categoryOptions";
 
 export type ScheduleModalProps = {
   onClose: () => void;
@@ -57,6 +58,7 @@ function CreateScheduleForm({ onAdd, loading }: CreateScheduleFormProps) {
   const [time, setTime] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState<Schedule["category"]>("OTHER");
+  const [categoryOpen, setCategoryOpen] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -75,6 +77,7 @@ function CreateScheduleForm({ onAdd, loading }: CreateScheduleFormProps) {
     setTime("");
     setDescription("");
     setCategory("OTHER");
+    setCategoryOpen(false);
   };
 
   return (
@@ -111,16 +114,46 @@ function CreateScheduleForm({ onAdd, loading }: CreateScheduleFormProps) {
       </div>
       <div className="space-y-1">
         <label className="block text-xs text-gray-500">유형</label>
-        <select
-          value={category}
-          onChange={(e) => setCategory(e.target.value as Schedule["category"])}
-          className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-        >
-          <option value="OTHER">기타</option>
-          <option value="MEETING">미팅</option>
-          <option value="DAY_OFF">연차 / 휴가</option>
-          <option value="IMPORTANT">중요</option>
-        </select>
+        <div className="relative text-xs">
+          <button
+            type="button"
+            onClick={() => setCategoryOpen((prev) => !prev)}
+            className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 hover:bg-gray-50"
+          >
+            <span>
+              {CATEGORY_OPTIONS.find((opt) => opt.value === category)?.label}
+            </span>
+            <span className="text-gray-400 text-[10px]">▾</span>
+          </button>
+
+          {categoryOpen && (
+            <div className="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-auto">
+              {CATEGORY_OPTIONS.map((opt) => {
+                const isActive = opt.value === category;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => {
+                      setCategory(opt.value as Schedule["category"]);
+                      setCategoryOpen(false);
+                    }}
+                    className={`w-full px-3 py-2 text-left flex items-center justify-between text-xs ${
+                      isActive
+                        ? "bg-indigo-50 text-indigo-600 font-semibold"
+                        : "text-gray-700 hover:bg-gray-50"
+                    }`}
+                  >
+                    <span>{opt.label}</span>
+                    {isActive && (
+                      <span className="text-indigo-500 text-[11px]">✓</span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="space-y-1">
