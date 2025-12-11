@@ -18,6 +18,7 @@ export default function HomePage() {
   const [selectedSchedule, setSelectedSchedule] = useState<Schedule | null>(
     null,
   );
+  const [defaultDate, setDefaultDate] = useState<string | null>(null);
 
   const { data, isLoading, isError } = useSchedules();
   const createMutation = useCreateSchedule();
@@ -53,7 +54,10 @@ export default function HomePage() {
 
           <button
             type="button"
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => {
+              setDefaultDate(null);
+              setIsModalOpen(true);
+            }}
             className="bg-indigo-500 hover:bg-indigo-400 text-sm font-medium px-4 py-2 rounded-full text-white shadow-sm"
           >
             + 일정 추가
@@ -72,6 +76,10 @@ export default function HomePage() {
             <ScheduleCalendar
               schedules={schedules}
               onScheduleClick={setSelectedSchedule}
+              onDateClick={(date) => {
+                setDefaultDate(date); // "2025-12-11" 이런 형태로 들어옴
+                setIsModalOpen(true); // 일정 추가 모달 열기
+              }}
             />
           )}
         </section>
@@ -82,6 +90,7 @@ export default function HomePage() {
             onClose={() => setIsModalOpen(false)}
             onSubmit={handleAdd}
             loading={createMutation.isPending}
+            defaultDate={defaultDate}
           />
         )}
 

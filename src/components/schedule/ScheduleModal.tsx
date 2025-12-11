@@ -10,12 +10,14 @@ export type ScheduleModalProps = {
     payload: Omit<Schedule, "id" | "createdAt" | "updatedAt">,
   ) => Promise<void> | void;
   loading?: boolean;
+  defaultDate?: string | null;
 };
 
 export function ScheduleModal({
   onClose,
   onSubmit,
   loading,
+  defaultDate,
 }: ScheduleModalProps) {
   return (
     <div
@@ -38,7 +40,11 @@ export function ScheduleModal({
         </div>
 
         <div className="p-4">
-          <CreateScheduleForm onAdd={onSubmit} loading={loading} />
+          <CreateScheduleForm
+            onAdd={onSubmit}
+            loading={loading}
+            defaultDate={defaultDate}
+          />
         </div>
       </div>
     </div>
@@ -50,11 +56,16 @@ type CreateScheduleFormProps = {
     payload: Omit<Schedule, "id" | "createdAt" | "updatedAt">,
   ) => Promise<void> | void;
   loading?: boolean;
+  defaultDate?: string | null;
 };
 
-function CreateScheduleForm({ onAdd, loading }: CreateScheduleFormProps) {
+function CreateScheduleForm({
+  onAdd,
+  loading,
+  defaultDate,
+}: CreateScheduleFormProps) {
   const [title, setTitle] = useState("");
-  const [date, setDate] = useState("");
+  const [date, setDate] = useState(defaultDate ?? "");
   const [time, setTime] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState<Schedule["category"]>("OTHER");

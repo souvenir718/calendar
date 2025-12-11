@@ -35,11 +35,13 @@ function getCategoryClasses(category?: string) {
 export type ScheduleCalendarProps = {
   schedules: Schedule[];
   onScheduleClick: (schedule: Schedule) => void;
+  onDateClick?: (date: string) => void;
 };
 
 export function ScheduleCalendar({
   schedules,
   onScheduleClick,
+  onDateClick,
 }: ScheduleCalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(() => {
     const now = new Date();
@@ -182,10 +184,17 @@ export function ScheduleCalendar({
             const key = formatDateKey(cell.date);
             const daySchedules = schedulesByDate.get(key) ?? [];
 
+            const handleDateClick = () => {
+              if (onDateClick) {
+                onDateClick(key);
+              }
+            };
+
             return (
               <div
                 key={`${wi}-${di}`}
-                className="min-h-[64px] sm:min-h-[72px] md:min-h-[96px] lg:min-h-[110px] bg-white border border-gray-300 rounded-md flex flex-col p-1"
+                className="min-h-[64px] sm:min-h-[72px] md:min-h-[96px] lg:min-h-[110px] bg-white border border-gray-300 rounded-md flex flex-col p-1 cursor-pointer"
+                onClick={handleDateClick}
               >
                 <div className="flex items-center justify-between mb-1">
                   {(() => {
@@ -198,7 +207,7 @@ export function ScheduleCalendar({
                         className={
                           isToday
                             ? "inline-flex items-center justify-center w-5 h-5 rounded-full bg-indigo-600 text-[11px] font-semibold text-white"
-                            : "text-[11px] font-semibold text-gray-500"
+                            : "inline-flex items-center justify-center w-5 h-5 text-[11px] font-semibold text-gray-500"
                         }
                       >
                         {cell.date.getDate()}
@@ -218,7 +227,10 @@ export function ScheduleCalendar({
                       className={`rounded px-1 py-[2px] flex items-start justify-between gap-1 cursor-pointer ${getCategoryClasses(
                         s.category,
                       )}`}
-                      onClick={() => onScheduleClick(s)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onScheduleClick(s);
+                      }}
                     >
                       <div className="flex-1">
                         <div className="truncate">
