@@ -4,8 +4,8 @@ import "./globals.css";
 import Providers from "./providers";
 
 export const metadata: Metadata = {
-  title: "Company Schedule",
-  description: "회사 일정 관리 보드",
+  title: "FruitsFamily Schedule",
+  description: "Fruits 일정 관리 보드",
 };
 
 export default function RootLayout({

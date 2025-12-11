@@ -44,7 +44,7 @@ export default function HomePage() {
         <header className="flex items-center justify-between mb-4">
           <div className="flex items-baseline gap-3">
             <h1 className="text-2xl font-semibold text-slate-900">
-              회사 일정 보드
+              Fruits Calendar
             </h1>
             <span className="text-xs text-slate-500">
               {isLoading ? "불러오는 중..." : `총 ${schedules.length}개 일정`}
