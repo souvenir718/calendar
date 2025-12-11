@@ -7,6 +7,7 @@ const CATEGORY_LABEL_MAP: Record<string, string> = {
   MEETING: "미팅",
   DAY_OFF: "연차",
   IMPORTANT: "중요",
+  PAYDAY: "",
   OTHER: "",
 };
 
@@ -14,6 +15,7 @@ const CATEGORY_CLASS_MAP: Record<string, string> = {
   MEETING: "bg-blue-100 text-blue-800",
   DAY_OFF: "bg-emerald-100 text-emerald-800",
   IMPORTANT: "bg-rose-100 text-rose-800",
+  PAYDAY: "bg-amber-50 text-amber-700 border border-amber-200",
   OTHER: "bg-gray-100 text-gray-800",
 };
 

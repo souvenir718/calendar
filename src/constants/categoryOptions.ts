@@ -9,4 +9,5 @@ export const CATEGORY_OPTIONS: {
   { value: "MEETING", label: "미팅" },
   { value: "DAY_OFF", label: "연차 / 휴가" },
   { value: "IMPORTANT", label: "중요" },
+  { value: "PAYDAY", label: "월급날" },
 ];

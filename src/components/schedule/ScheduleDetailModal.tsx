@@ -21,6 +21,10 @@ const CATEGORY_DISPLAY: Record<
     label: "미팅",
     className: "bg-indigo-50 text-indigo-600 border border-indigo-100",
   },
+  PAYDAY: {
+    label: "월급날",
+    className: "bg-amber-50 text-amber-700 border border-amber-200",
+  },
   OTHER: {
     label: "기타",
     className: "bg-slate-50 text-slate-600 border border-slate-200",

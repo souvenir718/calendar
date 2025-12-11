@@ -1,4 +1,9 @@
-export type ScheduleCategory = "DAY_OFF" | "MEETING" | "IMPORTANT" | "OTHER";
+export type ScheduleCategory =
+  | "DAY_OFF"
+  | "MEETING"
+  | "IMPORTANT"
+  | "PAYDAY"
+  | "OTHER";
 
 export type Schedule = {
   id: number;
