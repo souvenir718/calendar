@@ -1,0 +1,210 @@
+"use client";
+
+import { useState } from "react";
+import type { Schedule } from "@/types/schedule";
+
+export type ScheduleDetailModalProps = {
+  schedule: Schedule;
+  onClose: () => void;
+  onDelete: () => void | Promise<void>;
+  onUpdate?: (updated: Schedule) => void | Promise<unknown>;
+};
+
+export function ScheduleDetailModal({
+  schedule,
+  onClose,
+  onDelete,
+  onUpdate,
+}: ScheduleDetailModalProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [title, setTitle] = useState(schedule.title);
+  const [date, setDate] = useState(schedule.date ?? "");
+  const [time, setTime] = useState(schedule.time ?? "");
+  const [description, setDescription] = useState(schedule.description ?? "");
+  const [saving, setSaving] = useState(false);
+
+  const handleStartEdit = () => {
+    setIsEditing(true);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setTitle(schedule.title);
+    setDate(schedule.date ?? "");
+    setTime(schedule.time ?? "");
+    setDescription(schedule.description ?? "");
+  };
+
+  const handleSave = async () => {
+    if (!onUpdate) {
+      setIsEditing(false);
+      return;
+    }
+
+    const trimmedTitle = title.trim();
+    if (!trimmedTitle || !date) {
+      return;
+    }
+
+    setSaving(true);
+    await onUpdate({
+      ...schedule,
+      title: trimmedTitle,
+      date,
+      time: time || undefined,
+      description: description || undefined,
+    });
+    setSaving(false);
+    setIsEditing(false);
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 modal-overlay-fade"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white border border-gray-200 rounded-2xl w-full max-w-md mx-4 shadow-xl modal-fade"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
+          <h3 className="text-sm font-semibold text-gray-900">일정 상세</h3>
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700 text-sm"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div className="p-4 space-y-4 text-sm">
+          {/* 제목 영역 */}
+          <div className="space-y-1">
+            <div className="text-[11px] font-medium text-indigo-600">일정</div>
+            {isEditing ? (
+              <input
+                className="w-full text-base font-semibold text-gray-900 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="일정 제목을 입력하세요"
+              />
+            ) : (
+              <div className="text-base font-semibold text-gray-900 break-words">
+                {schedule.title}
+              </div>
+            )}
+          </div>
+
+          {/* 날짜 / 시간 영역 */}
+          <div className="rounded-xl bg-gray-50 px-3 py-2 space-y-1">
+            <div className="flex items-center text-xs text-gray-600">
+              <span className="mr-2">📅</span>
+              {isEditing ? (
+                <input
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="border border-gray-300 rounded-md px-2 py-1 text-xs text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              ) : (
+                <span>{schedule.date}</span>
+              )}
+            </div>
+            <div className="flex items-center text-xs text-gray-600">
+              <span className="mr-2">⏰</span>
+              {isEditing ? (
+                <input
+                  type="time"
+                  value={time}
+                  onChange={(e) => setTime(e.target.value)}
+                  className="border border-gray-300 rounded-md px-2 py-1 text-xs text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              ) : schedule.time ? (
+                <span>{schedule.time}</span>
+              ) : (
+                <span className="text-gray-400">시간 정보 없음</span>
+              )}
+            </div>
+          </div>
+
+          {/* 설명 영역 */}
+          <div className="space-y-1">
+            <div className="text-xs text-gray-500">설명</div>
+            {isEditing ? (
+              <textarea
+                className="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 whitespace-pre-wrap focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                rows={3}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="설명을 입력하세요."
+              />
+            ) : schedule.description ? (
+              <div className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 whitespace-pre-wrap">
+                {schedule.description}
+              </div>
+            ) : (
+              <div className="rounded-xl border border-dashed border-gray-200 px-3 py-2 text-xs text-gray-400">
+                설명이 없습니다.
+              </div>
+            )}
+          </div>
+
+          {/* 액션 버튼 */}
+          <div className="flex justify-end gap-2 pt-3">
+            {isEditing ? (
+              <>
+                <button
+                  type="button"
+                  onClick={handleCancelEdit}
+                  className="px-3 py-1.5 rounded-lg border border-gray-300 text-xs text-gray-700 hover:bg-gray-100"
+                >
+                  취소
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  disabled={saving || !title.trim() || !date}
+                  className="px-3 py-1.5 rounded-lg bg-indigo-500 hover:bg-indigo-600 disabled:opacity-60 text-xs font-medium text-white"
+                >
+                  {saving ? "저장 중..." : "저장"}
+                </button>
+                <button
+                  type="button"
+                  onClick={onDelete}
+                  className="px-3 py-1.5 rounded-lg bg-red-500 hover:bg-red-600 text-xs font-medium text-white"
+                >
+                  삭제
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="px-3 py-1.5 rounded-lg border border-gray-300 text-xs text-gray-700 hover:bg-gray-100"
+                >
+                  닫기
+                </button>
+                <button
+                  type="button"
+                  onClick={handleStartEdit}
+                  className="px-3 py-1.5 rounded-lg border border-indigo-500 text-xs text-indigo-600 hover:bg-indigo-50"
+                >
+                  수정
+                </button>
+                <button
+                  type="button"
+                  onClick={onDelete}
+                  className="px-3 py-1.5 rounded-lg bg-red-500 hover:bg-red-600 text-xs font-medium text-white"
+                >
+                  삭제
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
