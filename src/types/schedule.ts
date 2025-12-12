@@ -10,6 +10,7 @@ export type Schedule = {
   title: string;
   description?: string;
   date: string;
+  endDate?: string | null;
   time?: string;
   category?: ScheduleCategory;
   createdAt: string;

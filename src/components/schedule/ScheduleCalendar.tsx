@@ -43,6 +43,8 @@ export function ScheduleCalendar({
   onScheduleClick,
   onDateClick,
 }: ScheduleCalendarProps) {
+  console.log("schedules in calendar", schedules);
+
   const [currentMonth, setCurrentMonth] = useState(() => {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), 1);
@@ -81,15 +83,10 @@ export function ScheduleCalendar({
     weeks.push(currentWeek);
   }
 
-  const schedulesByDate = new Map<string, Schedule[]>();
-
-  for (const s of schedules) {
-    if (!s.date) continue;
-    const key = s.date;
-    const list = schedulesByDate.get(key) ?? [];
-    list.push(s);
-    schedulesByDate.set(key, list);
-  }
+  const parseDate = (value: string) => {
+    const [y, m, d] = value.split("-").map(Number);
+    return new Date(y, (m ?? 1) - 1, d ?? 1);
+  };
 
   const formatDateKey = (d: Date) => {
     const y = d.getFullYear();
@@ -97,6 +94,28 @@ export function ScheduleCalendar({
     const dd = String(d.getDate()).padStart(2, "0");
     return `${y}-${m}-${dd}`;
   };
+
+  const schedulesByDate = new Map<string, Schedule[]>();
+
+  for (const s of schedules) {
+    if (!s.date) continue;
+
+    const start = parseDate(s.date);
+    const end = s.endDate ? parseDate(s.endDate) : start;
+
+    const realEnd = end.getTime() < start.getTime() ? start : end;
+
+    for (
+      let d = new Date(start.getTime());
+      d.getTime() <= realEnd.getTime();
+      d.setDate(d.getDate() + 1)
+    ) {
+      const key = formatDateKey(d);
+      const list = schedulesByDate.get(key) ?? [];
+      list.push(s);
+      schedulesByDate.set(key, list);
+    }
+  }
 
   const handlePrevMonth = () => {
     setCurrentMonth(new Date(year, month - 1, 1));

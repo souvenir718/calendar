@@ -46,12 +46,14 @@ export function ScheduleDetailModal({
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(schedule.title);
   const [date, setDate] = useState(schedule.date ?? "");
+  const [endDate, setEndDate] = useState(schedule.endDate ?? "");
   const [time, setTime] = useState(schedule.time ?? "");
   const [description, setDescription] = useState(schedule.description ?? "");
   const [saving, setSaving] = useState(false);
   const [category, setCategory] = useState<Schedule["category"]>(
     schedule.category ?? "OTHER",
   );
+  const [dateError, setDateError] = useState("");
 
   const categoryKey = (schedule.category ?? "OTHER") as NonNullable<
     Schedule["category"]
@@ -66,9 +68,11 @@ export function ScheduleDetailModal({
     setIsEditing(false);
     setTitle(schedule.title);
     setDate(schedule.date ?? "");
+    setEndDate(schedule.endDate ?? "");
     setTime(schedule.time ?? "");
     setDescription(schedule.description ?? "");
     setCategory(schedule.category ?? "OTHER");
+    setDateError("");
   };
 
   const handleSave = async () => {
@@ -82,11 +86,19 @@ export function ScheduleDetailModal({
       return;
     }
 
+    if (endDate && endDate < date) {
+      setDateError("종료일은 시작일보다 앞설 수 없습니다.");
+      return;
+    } else {
+      setDateError("");
+    }
+
     setSaving(true);
     await onUpdate({
       id: schedule.id,
       title: trimmedTitle,
       date,
+      endDate: endDate || undefined,
       time: time || undefined,
       description: description || undefined,
       category,
@@ -153,16 +165,32 @@ export function ScheduleDetailModal({
             <div className="flex items-center text-xs text-gray-600">
               <span className="mr-2">📅</span>
               {isEditing ? (
-                <input
-                  type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="border border-gray-300 rounded-md px-2 py-1 text-xs text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                />
+                <div className="flex items-center gap-2">
+                  <input
+                    type="date"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    className="border border-gray-300 rounded-md px-2 py-1 text-xs text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  />
+                  <span className="text-gray-400 text-[11px]">~</span>
+                  <input
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    className="border border-gray-300 rounded-md px-2 py-1 text-xs text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  />
+                </div>
               ) : (
-                <span>{schedule.date}</span>
+                <span>
+                  {schedule.endDate && schedule.endDate !== schedule.date
+                    ? `${schedule.date} ~ ${schedule.endDate}`
+                    : schedule.date}
+                </span>
               )}
             </div>
+            {dateError && (
+              <div className="text-[11px] text-red-500 mt-1">{dateError}</div>
+            )}
             <div className="flex items-center text-xs text-gray-600">
               <span className="mr-2">⏰</span>
               {isEditing ? (

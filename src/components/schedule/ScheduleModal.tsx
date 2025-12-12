@@ -66,18 +66,33 @@ function CreateScheduleForm({
 }: CreateScheduleFormProps) {
   const [title, setTitle] = useState("");
   const [date, setDate] = useState(defaultDate ?? "");
+  const [endDate, setEndDate] = useState(defaultDate ?? "");
   const [time, setTime] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState<Schedule["category"]>("OTHER");
   const [categoryOpen, setCategoryOpen] = useState(false);
+  const [dateError, setDateError] = useState("");
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!title || !date) return;
+    if (!title || !date) {
+      setDateError("제목과 시작일을 입력해주세요.");
+      return;
+    } else {
+      setDateError("");
+    }
+
+    if (endDate && endDate < date) {
+      setDateError("종료일은 시작일보다 앞설 수 없습니다.");
+      return;
+    } else {
+      setDateError("");
+    }
 
     await onAdd({
       title,
       date,
+      endDate: endDate || undefined,
       time: time || undefined,
       description: description || undefined,
       category: category || undefined,
@@ -85,6 +100,7 @@ function CreateScheduleForm({
 
     setTitle("");
     setDate("");
+    setEndDate("");
     setTime("");
     setDescription("");
     setCategory("OTHER");
@@ -105,7 +121,7 @@ function CreateScheduleForm({
 
       <div className="grid grid-cols-2 gap-2">
         <div className="space-y-1">
-          <label className="block text-xs text-gray-500">날짜 *</label>
+          <label className="block text-xs text-gray-500">시작일 *</label>
           <input
             type="date"
             value={date}
@@ -114,15 +130,28 @@ function CreateScheduleForm({
           />
         </div>
         <div className="space-y-1">
-          <label className="block text-xs text-gray-500">시간</label>
+          <label className="block text-xs text-gray-500">종료일</label>
           <input
-            type="time"
-            value={time}
-            onChange={(e) => setTime(e.target.value)}
+            type="date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
             className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           />
         </div>
       </div>
+      {dateError && (
+        <div className="text-[11px] text-red-500 mt-1">{dateError}</div>
+      )}
+      <div className="space-y-1">
+        <label className="block text-xs text-gray-500">시간</label>
+        <input
+          type="time"
+          value={time}
+          onChange={(e) => setTime(e.target.value)}
+          className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+        />
+      </div>
+
       <div className="space-y-1">
         <label className="block text-xs text-gray-500">유형</label>
         <div className="relative text-xs">

@@ -25,6 +25,7 @@ export async function POST(req: Request) {
       title: body.title,
       description: body.description ?? undefined,
       date: body.date,
+      endDate: body.endDate ?? null,
       time: body.time ?? undefined,
       category: body.category ?? "OTHER",
       createdAt: now,
