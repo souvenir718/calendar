@@ -40,7 +40,7 @@ function generateMonthlyPaydays(startId: number): {
 
       result.push({
         id: nextId++,
-        title: "💰월급날 💰",
+        title: "💰월급날💰",
         description: "Flex!!",
         date: formatDateKey(date),
         time: undefined,

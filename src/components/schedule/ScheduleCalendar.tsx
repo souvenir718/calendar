@@ -225,8 +225,8 @@ export function ScheduleCalendar({
                       <span
                         className={
                           isToday
-                            ? "inline-flex items-center justify-center w-5 h-5 rounded-full bg-indigo-600 text-[11px] font-semibold text-white"
-                            : "inline-flex items-center justify-center w-5 h-5 text-[11px] font-semibold text-gray-500"
+                            ? "inline-flex items-center justify-center w-5 h-5 ml-0.5 mt-0.5 pt-px tabular-nums rounded-full bg-indigo-600 text-[11px] font-semibold text-white text-center"
+                            : "inline-flex items-center justify-center w-5 h-5 ml-0.5 mt-0.5 pt-px tabular-nums text-[11px] font-semibold text-gray-500"
                         }
                       >
                         {cell.date.getDate()}
@@ -253,7 +253,7 @@ export function ScheduleCalendar({
                     >
                       <div className="flex-1">
                         <div className="truncate">
-                          <span className="text-[10px]">
+                          <span className="text-[11px] font-semibold">
                             {getCategoryLabel(s.category)}
                             {s.title}
                           </span>
