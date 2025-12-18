@@ -1,60 +1,79 @@
 // app/api/schedules/[id]/route.ts
 import { NextResponse } from "next/server";
-import type { Schedule } from "@/types/schedule";
-import { schedules } from "@/app/api/schedules/store";
+import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
+import { toDateOnly, toYmd } from "@/app/api/schedules/route";
+
+type Ctx = { params: Promise<{ id: string }> };
 
 // PATCH /api/schedules/:id
-export async function PATCH(
-  req: Request,
-  context: { params: Promise<{ id: string }> },
-) {
+export async function PATCH(req: Request, context: Ctx) {
   try {
     const { id: rawId } = await context.params;
     const id = Number(rawId);
-    const body = await req.json();
-    const store = schedules;
 
-    const index = store.findIndex((s) => s.id === id);
-    if (index === -1) {
-      return new NextResponse("Not found", { status: 404 });
+    if (!Number.isFinite(id)) {
+      return new NextResponse("Invalid id", { status: 400 });
     }
 
-    const prev = store[index];
-    const updated: Schedule = {
-      ...prev,
-      ...body,
-      id,
-      updatedAt: new Date().toISOString(),
-    };
+    const body = await req.json();
 
-    store[index] = updated;
+    const updated = await prisma.schedule.update({
+      where: { id },
+      data: {
+        // 필드가 없으면 업데이트하지 않도록 undefined 유지
+        title: body.title ?? undefined,
+        description: body.description ?? undefined,
+        time: body.time ?? undefined,
+        category: body.category ?? undefined,
+        date: body.date ? toDateOnly(body.date) : undefined,
+        endDate:
+          body.endDate === null
+            ? null
+            : body.endDate
+              ? toDateOnly(body.endDate)
+              : undefined,
+      },
+    });
 
-    return NextResponse.json(updated);
-  } catch (e) {
+    return NextResponse.json({
+      ...updated,
+      date: toYmd(updated.date),
+      endDate: updated.endDate ? toYmd(updated.endDate) : undefined,
+    });
+  } catch (e: unknown) {
+    // Prisma: record not found
+    if (
+      e instanceof Prisma.PrismaClientKnownRequestError &&
+      e.code === "P2025"
+    ) {
+      return new NextResponse("Not found", { status: 404 });
+    }
     console.error(e);
     return new NextResponse("서버 오류", { status: 500 });
   }
 }
 
 // DELETE /api/schedules/:id
-export async function DELETE(
-  _req: Request,
-  context: { params: Promise<{ id: string }> },
-) {
+export async function DELETE(_req: Request, context: Ctx) {
   try {
     const { id: rawId } = await context.params;
     const id = Number(rawId);
-    const store = schedules;
-    const index = store.findIndex((s) => s.id === id);
 
-    if (index === -1) {
-      return new NextResponse("Not found", { status: 404 });
+    if (!Number.isFinite(id)) {
+      return new NextResponse("Invalid id", { status: 400 });
     }
 
-    store.splice(index, 1);
+    await prisma.schedule.delete({ where: { id } });
 
     return new NextResponse(null, { status: 204 });
-  } catch (e) {
+  } catch (e: unknown) {
+    if (
+      e instanceof Prisma.PrismaClientKnownRequestError &&
+      e.code === "P2025"
+    ) {
+      return new NextResponse("Not found", { status: 404 });
+    }
     console.error(e);
     return new NextResponse("서버 오류", { status: 500 });
   }
