@@ -1,6 +1,7 @@
 // app/api/schedules/[id]/route.ts
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { Prisma } from "@prisma/client";
 import { toDateOnly, toYmd } from "@/app/api/schedules/route";
 
@@ -44,7 +45,7 @@ export async function PATCH(req: Request, context: Ctx) {
   } catch (e: unknown) {
     // Prisma: record not found
     if (
-      e instanceof Prisma.PrismaClientKnownRequestError &&
+      e instanceof PrismaClientKnownRequestError &&
       e.code === "P2025"
     ) {
       return new NextResponse("Not found", { status: 404 });
@@ -64,12 +65,16 @@ export async function DELETE(_req: Request, context: Ctx) {
       return new NextResponse("Invalid id", { status: 400 });
     }
 
-    await prisma.schedule.delete({ where: { id } });
+    const result = await prisma.schedule.deleteMany({ where: { id } });
+
+    if (result.count === 0) {
+      return new NextResponse("Not found", { status: 404 });
+    }
 
     return new NextResponse(null, { status: 204 });
   } catch (e: unknown) {
     if (
-      e instanceof Prisma.PrismaClientKnownRequestError &&
+      e instanceof PrismaClientKnownRequestError &&
       e.code === "P2025"
     ) {
       return new NextResponse("Not found", { status: 404 });

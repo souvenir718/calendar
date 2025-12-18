@@ -32,6 +32,7 @@ const CATEGORY_DISPLAY: Record<
 };
 export type ScheduleDetailModalProps = {
   schedule: Schedule;
+  isDeleting?: boolean;
   onClose: () => void;
   onDelete: () => void | Promise<void>;
   onUpdate?: (updated: UpdateScheduleInput) => void | Promise<unknown>;
@@ -42,6 +43,7 @@ export function ScheduleDetailModal({
   onClose,
   onDelete,
   onUpdate,
+  isDeleting = false,
 }: ScheduleDetailModalProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(schedule.title);
@@ -110,7 +112,7 @@ export function ScheduleDetailModal({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 modal-overlay-fade"
-      onClick={onClose}
+      onClick={isDeleting ? undefined : onClose}
     >
       <div
         className="bg-white border border-gray-200 rounded-2xl w-full max-w-md mx-4 shadow-xl modal-fade"
@@ -121,7 +123,12 @@ export function ScheduleDetailModal({
           <button
             type="button"
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 text-sm"
+            disabled={isDeleting}
+            className={`text-sm ${
+              isDeleting
+                ? "text-gray-300 cursor-not-allowed"
+                : "text-gray-500 hover:text-gray-700"
+            }`}
           >
             ✕
           </button>
@@ -252,9 +259,20 @@ export function ScheduleDetailModal({
                 <button
                   type="button"
                   onClick={onDelete}
-                  className="px-3 py-1.5 rounded-lg bg-red-500 hover:bg-red-600 text-xs font-medium text-white"
+                  disabled={isDeleting}
+                  className={`inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-white ${
+                    isDeleting
+                      ? "bg-red-300 cursor-not-allowed"
+                      : "bg-red-500 hover:bg-red-600"
+                  }`}
                 >
-                  삭제
+                  {isDeleting && (
+                    <span
+                      aria-hidden
+                      className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent"
+                    />
+                  )}
+                  {isDeleting ? "삭제 중..." : "삭제"}
                 </button>
               </>
             ) : (
@@ -262,23 +280,44 @@ export function ScheduleDetailModal({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-3 py-1.5 rounded-lg border border-gray-300 text-xs text-gray-700 hover:bg-gray-100"
+                  disabled={isDeleting}
+                  className={`px-3 py-1.5 rounded-lg border text-xs ${
+                    isDeleting
+                      ? "border-gray-200 text-gray-300 cursor-not-allowed"
+                      : "border-gray-300 text-gray-700 hover:bg-gray-100"
+                  }`}
                 >
                   닫기
                 </button>
                 <button
                   type="button"
                   onClick={handleStartEdit}
-                  className="px-3 py-1.5 rounded-lg border border-indigo-500 text-xs text-indigo-600 hover:bg-indigo-50"
+                  disabled={isDeleting}
+                  className={`px-3 py-1.5 rounded-lg border text-xs ${
+                    isDeleting
+                      ? "border-indigo-200 text-indigo-300 cursor-not-allowed"
+                      : "border-indigo-500 text-indigo-600 hover:bg-indigo-50"
+                  }`}
                 >
                   수정
                 </button>
                 <button
                   type="button"
                   onClick={onDelete}
-                  className="px-3 py-1.5 rounded-lg bg-red-500 hover:bg-red-600 text-xs font-medium text-white"
+                  disabled={isDeleting}
+                  className={`inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-white ${
+                    isDeleting
+                      ? "bg-red-300 cursor-not-allowed"
+                      : "bg-red-500 hover:bg-red-600"
+                  }`}
                 >
-                  삭제
+                  {isDeleting && (
+                    <span
+                      aria-hidden
+                      className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent"
+                    />
+                  )}
+                  {isDeleting ? "삭제 중..." : "삭제"}
                 </button>
               </>
             )}

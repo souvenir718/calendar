@@ -19,6 +19,7 @@ export default function HomePage() {
     null,
   );
   const [defaultDate, setDefaultDate] = useState<string | null>(null);
+  const [showDeleteToast, setShowDeleteToast] = useState(false);
 
   const { data, isLoading, isError } = useSchedules();
   const createMutation = useCreateSchedule();
@@ -36,7 +37,11 @@ export default function HomePage() {
 
   const handleDelete = async (id: number) => {
     await deleteMutation.mutateAsync(id);
+    setShowDeleteToast(true);
+    setTimeout(() => setShowDeleteToast(false), 2000);
   };
+
+  const isDeleting = deleteMutation.isPending;
 
   return (
     <main className="min-h-screen py-8 px-4">
@@ -100,9 +105,14 @@ export default function HomePage() {
             schedule={selectedSchedule}
             onClose={() => setSelectedSchedule(null)}
             onDelete={async () => {
-              await handleDelete(selectedSchedule.id);
-              setSelectedSchedule(null);
+              try {
+                await handleDelete(selectedSchedule.id);
+                setTimeout(() => setSelectedSchedule(null), 350);
+              } catch (e) {
+                console.error(e);
+              }
             }}
+            isDeleting={isDeleting}
             onUpdate={async (updated) => {
               const result = await updateMutation.mutateAsync(updated);
               setSelectedSchedule(result);
@@ -110,6 +120,11 @@ export default function HomePage() {
           />
         )}
       </div>
+      {showDeleteToast && (
+        <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-full bg-slate-900 px-5 py-2 text-sm text-white shadow-lg">
+          일정이 삭제되었습니다
+        </div>
+      )}
     </main>
   );
 }
