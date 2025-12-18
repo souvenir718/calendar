@@ -2,7 +2,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
-import { Prisma } from "@prisma/client";
 import { toDateOnly, toYmd } from "@/app/api/schedules/route";
 
 type Ctx = { params: Promise<{ id: string }> };

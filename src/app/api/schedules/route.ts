@@ -1,7 +1,6 @@
 // app/api/schedules/route.ts
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import type { Schedule as DbSchedule } from "@prisma/client";
 
 // YYYY-MM-DD -> Date (UTC 기준, 날짜 밀림 방지)
 export const toDateOnly = (s: string) => {
@@ -19,11 +18,11 @@ export const toYmd = (d: Date) => {
 
 // GET /api/schedules
 export async function GET() {
-  const rows: DbSchedule[] = await prisma.schedule.findMany({
+  const rows = await prisma.schedule.findMany({
     orderBy: { date: "asc" },
   });
 
-  const schedules = rows.map((r: DbSchedule) => ({
+  const schedules = rows.map((r) => ({
     ...r,
     date: toYmd(r.date),
     endDate: r.endDate ? toYmd(r.endDate) : undefined,
