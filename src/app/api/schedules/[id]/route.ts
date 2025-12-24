@@ -1,8 +1,10 @@
+export const runtime = "nodejs";
+
 // app/api/schedules/[id]/route.ts
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
-import { toDateOnly, toYmd } from "@/app/api/schedules/route";
+import {notifySlackDayOff, toDateOnly, toYmd} from "@/app/api/schedules/route";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -36,6 +38,16 @@ export async function PATCH(req: Request, context: Ctx) {
       },
     });
 
+    // 연차(DAY_OFF)로 수정된 경우 슬랙 알림
+    if (updated.category === "DAY_OFF") {
+      await notifySlackDayOff({
+        title: updated.title,
+        date: toYmd(updated.date),
+        endDate: updated.endDate ? toYmd(updated.endDate) : undefined,
+        isUpdated: true,
+      });
+    }
+
     return NextResponse.json({
       ...updated,
       date: toYmd(updated.date),
@@ -43,10 +55,7 @@ export async function PATCH(req: Request, context: Ctx) {
     });
   } catch (e: unknown) {
     // Prisma: record not found
-    if (
-      e instanceof PrismaClientKnownRequestError &&
-      e.code === "P2025"
-    ) {
+    if (e instanceof PrismaClientKnownRequestError && e.code === "P2025") {
       return new NextResponse("Not found", { status: 404 });
     }
     console.error(e);
@@ -72,10 +81,7 @@ export async function DELETE(_req: Request, context: Ctx) {
 
     return new NextResponse(null, { status: 204 });
   } catch (e: unknown) {
-    if (
-      e instanceof PrismaClientKnownRequestError &&
-      e.code === "P2025"
-    ) {
+    if (e instanceof PrismaClientKnownRequestError && e.code === "P2025") {
       return new NextResponse("Not found", { status: 404 });
     }
     console.error(e);
