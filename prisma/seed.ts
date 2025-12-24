@@ -1,5 +1,5 @@
 // prisma/seed.ts
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, ScheduleCategory } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -7,74 +7,76 @@ const prisma = new PrismaClient();
 const toDateOnlyUTC = (y: number, m1: number, d: number) =>
   new Date(Date.UTC(y, m1 - 1, d));
 
-// Date -> YYYY-MM-DD (UTC)
-const toYmdUTC = (date: Date) => {
-  const y = date.getUTCFullYear();
-  const m = String(date.getUTCMonth() + 1).padStart(2, "0");
-  const d = String(date.getUTCDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
-};
+// 2026년 대한민국 공휴일 (대체공휴일 포함)
+const HOLIDAYS: Array<{ title: string; month: number; day: number }> = [
+  // 신정
+  { title: "신정", month: 1, day: 1 }, // 01-01 (목)
 
-function nextWeekdayIfWeekend(date: Date) {
-  // date는 UTC로 만들었지만, 요일 계산은 로컬/UTC가 섞이면 위험하니 UTC 기준으로만 체크
-  while (date.getUTCDay() === 0 || date.getUTCDay() === 6) {
-    date.setUTCDate(date.getUTCDate() + 1);
-  }
-  return date;
-}
+  // 설날
+  { title: "설날 연휴", month: 2, day: 16 }, // 02-16 (월)
+  { title: "설날", month: 2, day: 17 }, // 02-17 (화)
+  { title: "설날 연휴", month: 2, day: 18 }, // 02-18 (수)
+
+  // 삼일절
+  { title: "삼일절", month: 3, day: 1 }, // 03-01 (일)
+  { title: "대체공휴일(삼일절)", month: 3, day: 2 }, // 03-02 (월)
+
+  // 어린이날
+  { title: "어린이날", month: 5, day: 5 }, // 05-05 (화)
+
+  // 부처님 오신 날
+  { title: "부처님 오신 날", month: 5, day: 24 }, // 05-24 (일)
+  { title: "대체공휴일(부처님 오신 날)", month: 5, day: 25 }, // 05-25 (월)
+
+  // 현충일
+  { title: "현충일", month: 6, day: 6 }, // 06-06 (토)
+
+  // 광복절
+  { title: "광복절", month: 8, day: 15 }, // 08-15 (토)
+  { title: "대체공휴일(광복절)", month: 8, day: 17 }, // 08-17 (월)
+
+  // 추석
+  { title: "추석 연휴", month: 9, day: 24 }, // 09-24 (목)
+  { title: "추석", month: 9, day: 25 }, // 09-25 (금)
+  { title: "추석 연휴", month: 9, day: 26 }, // 09-26 (토)
+
+  // 개천절
+  { title: "개천절", month: 10, day: 3 }, // 10-03 (토)
+  { title: "대체공휴일(개천절)", month: 10, day: 5 }, // 10-05 (월)
+
+  // 한글날
+  { title: "한글날", month: 10, day: 9 }, // 10-09 (금)
+
+  // 크리스마스
+  { title: "크리스마스", month: 12, day: 25 }, // 12-25 (금)
+];
 
 async function main() {
-  const today = new Date();
-  const startYear = today.getUTCFullYear();
-  const startMonth0 = today.getUTCMonth(); // 0-based
-  const endYear = startYear + 1;
-  const endMonth0 = 11; // Dec
+  for (const h of HOLIDAYS) {
+    const date = toDateOnlyUTC(2026, h.month, h.day);
 
-  let createdCount = 0;
-  let skippedCount = 0;
+    const exists = await prisma.schedule.findFirst({
+      where: {
+        category: ScheduleCategory.HOLIDAY,
+        date,
+      },
+      select: { id: true },
+    });
 
-  for (let year = startYear; year <= endYear; year++) {
-    const monthFrom = year === startYear ? startMonth0 : 0;
-    const monthTo = year === endYear ? endMonth0 : 11;
-
-    for (let month0 = monthFrom; month0 <= monthTo; month0++) {
-      // 월급 기준일: 매월 10일
-      const base = toDateOnlyUTC(year, month0 + 1, 10);
-      const payday = nextWeekdayIfWeekend(base);
-
-      const dateKey = toYmdUTC(payday);
-
-      // 중복 방지: 같은 dateKey에 PAYDAY가 이미 있으면 스킵
-      const exists = await prisma.schedule.findFirst({
-        where: {
-          category: "PAYDAY",
-          date: payday, // @db.Date라 날짜만 비교됨
-        },
-        select: { id: true },
-      });
-
-      if (exists) {
-        skippedCount++;
-        continue;
-      }
-
+    if (!exists) {
       await prisma.schedule.create({
         data: {
-          title: "💰월급날💰",
-          description: "Flex!!",
-          category: "PAYDAY",
-          date: payday,
+          title: `🎌 ${h.title}`,
+          description: "공휴일",
+          category: ScheduleCategory.HOLIDAY,
+          date,
           endDate: null,
           time: null,
         },
       });
-
-      createdCount++;
-      console.log(`✅ created PAYDAY: ${dateKey}`);
     }
   }
-
-  console.log(`\nDone. created=${createdCount}, skipped=${skippedCount}`);
+  console.log("[seed] HOLIDAY seeding completed");
 }
 
 main()

@@ -12,6 +12,7 @@ enum ScheduleCategory {
   OTHER
   MEETING
   DAY_OFF
+  HOLIDAY
   IMPORTANT
   PAYDAY
 }

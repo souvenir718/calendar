@@ -25,6 +25,10 @@ const CATEGORY_DISPLAY: Record<
     label: "월급날",
     className: "bg-amber-50 text-amber-700 border border-amber-200",
   },
+  HOLIDAY: {
+    label: "공휴일",
+    className: "bg-red-50 text-red-700 border border-red-200",
+  },
   OTHER: {
     label: "기타",
     className: "bg-slate-50 text-slate-600 border border-slate-200",

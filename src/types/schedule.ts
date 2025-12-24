@@ -3,6 +3,7 @@ export type ScheduleCategory =
   | "MEETING"
   | "IMPORTANT"
   | "PAYDAY"
+  | "HOLIDAY"
   | "OTHER";
 
 export type Schedule = {

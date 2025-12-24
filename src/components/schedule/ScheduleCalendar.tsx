@@ -8,14 +8,16 @@ const CATEGORY_LABEL_MAP: Record<string, string> = {
   DAY_OFF: "연차",
   IMPORTANT: "중요",
   PAYDAY: "",
+  HOLIDAY: "",
   OTHER: "",
 };
 
 const CATEGORY_CLASS_MAP: Record<string, string> = {
   MEETING: "bg-blue-100 text-blue-800",
   DAY_OFF: "bg-emerald-100 text-emerald-800",
-  IMPORTANT: "bg-rose-100 text-rose-800",
+  IMPORTANT: "bg-violet-50 text-violet-700 border border-violet-200 border-l-4 border-l-violet-500",
   PAYDAY: "bg-amber-50 text-amber-700 border border-amber-200",
+  HOLIDAY: "bg-red-50 text-red-700 border border-red-200 border-l-4 border-l-red-500",
   OTHER: "bg-gray-100 text-gray-800",
 };
 
@@ -43,8 +45,6 @@ export function ScheduleCalendar({
   onScheduleClick,
   onDateClick,
 }: ScheduleCalendarProps) {
-  console.log("schedules in calendar", schedules);
-
   const [currentMonth, setCurrentMonth] = useState(() => {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), 1);
@@ -226,7 +226,13 @@ export function ScheduleCalendar({
                         className={
                           isToday
                             ? "inline-flex items-center justify-center w-5 h-5 ml-0.5 mt-0.5 pt-px tabular-nums rounded-full bg-indigo-600 text-[11px] font-semibold text-white text-center"
-                            : "inline-flex items-center justify-center w-5 h-5 ml-0.5 mt-0.5 pt-px tabular-nums text-[11px] font-semibold text-gray-500"
+                            : `inline-flex items-center justify-center w-5 h-5 ml-0.5 mt-0.5 pt-px tabular-nums text-[11px] font-semibold ${
+                                cell.date.getDay() === 0
+                                  ? "text-red-500"
+                                  : cell.date.getDay() === 6
+                                    ? "text-blue-500"
+                                    : "text-gray-500"
+                              }`
                         }
                       >
                         {cell.date.getDate()}
