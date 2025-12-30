@@ -1,3 +1,5 @@
+import { ScheduleCategory } from "@/types/schedule";
+
 export const runtime = "nodejs";
 // app/api/schedules/route.ts
 import { NextResponse } from "next/server";
@@ -5,12 +7,20 @@ import { prisma } from "@/lib/prisma";
 
 const SLACK_WEBHOOK_URL = process.env.SLACK_WEBHOOK_URL;
 
-export async function notifySlackDayOff(params: {
+type LeaveCategory = Extract<
+  ScheduleCategory,
+  "DAY_OFF" | "AM_HALF" | "PM_HALF"
+>;
+
+export const isLeaveCategory = (c: ScheduleCategory): c is LeaveCategory =>
+  c === "DAY_OFF" || c === "AM_HALF" || c === "PM_HALF";
+
+export async function notifySlackLeave(params: {
   title: string;
   date: string;
   endDate?: string;
-  description?: string | null;
   isUpdated?: boolean;
+  category: LeaveCategory;
 }) {
   if (!SLACK_WEBHOOK_URL) return; // 설정 안 했으면 조용히 스킵
 
@@ -27,9 +37,12 @@ export async function notifySlackDayOff(params: {
       ? `${formatKoreanDate(params.date)} ~ ${formatKoreanDate(params.endDate)}`
       : formatKoreanDate(params.date);
 
-  const text = params?.isUpdated
-    ? `${params.title}: ${range} 연차 일정이 변경되었습니다. 업무에 참고 부탁드립니다 🙇‍♂️`
-    : `${params.title}: ${range} 연차 사용 예정입니다. 업무에 참고 부탁드립니다 🙇‍`;
+  const action = params.isUpdated ? "로 변경되었습니다" : "사용 예정입니다";
+  let leaveLabel = "연차";
+  if (params.category === "AM_HALF") leaveLabel = "오전 반차";
+  if (params.category === "PM_HALF") leaveLabel = "오후 반차";
+
+  const text = `${params.title}: ${range} ${leaveLabel} ${action}. 업무에 참고 부탁드립니다 🙇‍♂️`;
 
   try {
     await fetch(SLACK_WEBHOOK_URL, {
@@ -92,13 +105,13 @@ export async function POST(req: Request) {
       },
     });
 
-    // 연차 등록 시 슬랙 알림
-    if (created.category === "DAY_OFF") {
-      await notifySlackDayOff({
+    // 휴가/반차 등록 시 슬랙 알림
+    if (isLeaveCategory(created.category)) {
+      await notifySlackLeave({
         title: created.title,
         date: toYmd(created.date),
         endDate: created.endDate ? toYmd(created.endDate) : undefined,
-        description: created.description,
+        category: created.category,
       });
     }
 

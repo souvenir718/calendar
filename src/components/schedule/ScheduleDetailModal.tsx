@@ -11,11 +11,19 @@ const CATEGORY_DISPLAY: Record<
 > = {
   DAY_OFF: {
     label: "연차",
-    className: "bg-red-50 text-red-600 border border-red-100",
+    className: "bg-emerald-50 text-emerald-700 border border-emerald-200",
+  },
+  AM_HALF: {
+    label: "오전반차",
+    className: "bg-sky-50 text-sky-700 border border-sky-200",
+  },
+  PM_HALF: {
+    label: "오후반차",
+    className: "bg-indigo-50 text-indigo-700 border border-indigo-200",
   },
   IMPORTANT: {
     label: "중요",
-    className: "bg-amber-50 text-amber-600 border border-amber-100",
+    className: "bg-violet-50 text-violet-700 border border-violet-200",
   },
   MEETING: {
     label: "미팅",
@@ -23,7 +31,7 @@ const CATEGORY_DISPLAY: Record<
   },
   PAYDAY: {
     label: "월급날",
-    className: "bg-amber-50 text-amber-700 border border-amber-200",
+    className: "bg-amber-100 text-amber-800 border border-amber-300",
   },
   HOLIDAY: {
     label: "공휴일",

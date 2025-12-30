@@ -6,6 +6,8 @@ export const CATEGORY_OPTIONS: {
   label: string;
 }[] = [
   { value: "DAY_OFF", label: "연차 / 휴가" },
+  { value: "AM_HALF", label: "오전 반차" },
+  { value: "PM_HALF", label: "오후 반차" },
   { value: "MEETING", label: "미팅" },
   { value: "IMPORTANT", label: "중요" },
   { value: "PAYDAY", label: "월급날" },

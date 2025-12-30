@@ -6,6 +6,8 @@ import type { Schedule } from "@/types/schedule";
 const CATEGORY_LABEL_MAP: Record<string, string> = {
   MEETING: "미팅",
   DAY_OFF: "연차",
+  AM_HALF: "오전반차",
+  PM_HALF: "오후반차",
   IMPORTANT: "중요",
   PAYDAY: "",
   HOLIDAY: "",
@@ -15,9 +17,13 @@ const CATEGORY_LABEL_MAP: Record<string, string> = {
 const CATEGORY_CLASS_MAP: Record<string, string> = {
   MEETING: "bg-blue-100 text-blue-800",
   DAY_OFF: "bg-emerald-100 text-emerald-800",
-  IMPORTANT: "bg-violet-50 text-violet-700 border border-violet-200 border-l-4 border-l-violet-500",
+  AM_HALF: "bg-sky-50 text-sky-700 border border-sky-200",
+  PM_HALF: "bg-indigo-50 text-indigo-700 border border-indigo-200",
+  IMPORTANT:
+    "bg-violet-50 text-violet-700 border border-violet-200 border-l-4 border-l-violet-500",
   PAYDAY: "bg-amber-50 text-amber-700 border border-amber-200",
-  HOLIDAY: "bg-red-50 text-red-700 border border-red-200 border-l-4 border-l-red-500",
+  HOLIDAY:
+    "bg-red-50 text-red-700 border border-red-200 border-l-4 border-l-red-500",
   OTHER: "bg-gray-100 text-gray-800",
 };
 

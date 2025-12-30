@@ -12,6 +12,8 @@ enum ScheduleCategory {
   OTHER
   MEETING
   DAY_OFF
+  AM_HALF
+  PM_HALF
   HOLIDAY
   IMPORTANT
   PAYDAY

@@ -4,7 +4,12 @@ export const runtime = "nodejs";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
-import {notifySlackDayOff, toDateOnly, toYmd} from "@/app/api/schedules/route";
+import {
+  isLeaveCategory,
+  notifySlackLeave,
+  toDateOnly,
+  toYmd,
+} from "@/app/api/schedules/route";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -39,12 +44,13 @@ export async function PATCH(req: Request, context: Ctx) {
     });
 
     // 연차(DAY_OFF)로 수정된 경우 슬랙 알림
-    if (updated.category === "DAY_OFF") {
-      await notifySlackDayOff({
+    if (isLeaveCategory(updated.category)) {
+      await notifySlackLeave({
         title: updated.title,
         date: toYmd(updated.date),
         endDate: updated.endDate ? toYmd(updated.endDate) : undefined,
         isUpdated: true,
+        category: updated.category,
       });
     }
 
