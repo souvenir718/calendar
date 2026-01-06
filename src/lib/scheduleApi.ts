@@ -17,8 +17,17 @@ async function handleResponse<T>(res: Response): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-export async function fetchSchedules(): Promise<Schedule[]> {
-  const res = await fetch(BASE_URL, {
+export async function fetchSchedules(
+  year?: number,
+  month?: number,
+): Promise<Schedule[]> {
+  const params = new URLSearchParams();
+  if (year) params.append("year", String(year));
+  if (month) params.append("month", String(month));
+
+  const url = `${BASE_URL}?${params.toString()}`;
+
+  const res = await fetch(url, {
     method: "GET",
   });
 

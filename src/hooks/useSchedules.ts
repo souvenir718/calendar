@@ -11,10 +11,12 @@ import type { Schedule } from "@/types/schedule";
 
 const SCHEDULES_KEY = ["schedules"];
 
-export function useSchedules() {
+export function useSchedules(year?: number, month?: number) {
   return useQuery<Schedule[]>({
-    queryKey: SCHEDULES_KEY,
-    queryFn: fetchSchedules,
+    queryKey: [...SCHEDULES_KEY, year, month],
+    queryFn: () => fetchSchedules(year, month),
+    refetchInterval: 60000, // 1분마다 자동 갱신
+    refetchOnWindowFocus: true, // 창 활성화 시 갱신
   });
 }
 

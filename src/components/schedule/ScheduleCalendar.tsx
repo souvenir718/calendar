@@ -42,26 +42,36 @@ function getCategoryClasses(category?: string) {
 
 export type ScheduleCalendarProps = {
   schedules: Schedule[];
+  year: number;
+  month: number; // 1-based
   onScheduleClick: (schedule: Schedule) => void;
   onDateClick?: (date: string) => void;
+  onMonthChange: (year: number, month: number) => void;
 };
 
 export function ScheduleCalendar({
   schedules,
+  year,
+  month,
   onScheduleClick,
   onDateClick,
+  onMonthChange,
 }: ScheduleCalendarProps) {
-  const [currentMonth, setCurrentMonth] = useState(() => {
-    const now = new Date();
-    return new Date(now.getFullYear(), now.getMonth(), 1);
-  });
+  // 1-based month prop -> 0-based index for Date calculations
+  const monthIndex = month - 1;
 
-  const year = currentMonth.getFullYear();
-  const month = currentMonth.getMonth(); // 0-11
   const today = new Date();
 
-  const firstDay = new Date(year, month, 1);
-  const lastDay = new Date(year, month + 1, 0);
+  // Helper to calculate next/prev month and notify parent
+  const changeMonth = (offset: number) => {
+    // JavaScript Date handles month overflow/underflow automatically
+    // e.g. new Date(2025, -1, 1) -> Dec 2024
+    const newDate = new Date(year, monthIndex + offset, 1);
+    onMonthChange(newDate.getFullYear(), newDate.getMonth() + 1);
+  };
+
+  const firstDay = new Date(year, monthIndex, 1);
+  const lastDay = new Date(year, monthIndex + 1, 0);
   const daysInMonth = lastDay.getDate();
 
   // 일요일 시작 기준(0~6, 일:0 ~ 토:6)
@@ -75,7 +85,7 @@ export function ScheduleCalendar({
   }
 
   for (let day = 1; day <= daysInMonth; day++) {
-    currentWeek.push({ date: new Date(year, month, day) });
+    currentWeek.push({ date: new Date(year, monthIndex, day) });
     if (currentWeek.length === 7) {
       weeks.push(currentWeek);
       currentWeek = [];
@@ -123,20 +133,15 @@ export function ScheduleCalendar({
     }
   }
 
-  const handlePrevMonth = () => {
-    setCurrentMonth(new Date(year, month - 1, 1));
-  };
-
-  const handleNextMonth = () => {
-    setCurrentMonth(new Date(year, month + 1, 1));
-  };
+  const handlePrevMonth = () => changeMonth(-1);
+  const handleNextMonth = () => changeMonth(1);
 
   const handleToday = () => {
     const now = new Date();
-    setCurrentMonth(new Date(now.getFullYear(), now.getMonth(), 1));
+    onMonthChange(now.getFullYear(), now.getMonth() + 1);
   };
 
-  const monthLabel = `${year}년 ${month + 1}월`;
+  const monthLabel = `${year}년 ${month}월`;
   const weekDays = ["일", "월", "화", "수", "목", "금", "토"];
 
   return (
@@ -183,9 +188,8 @@ export function ScheduleCalendar({
           return (
             <div
               key={day}
-              className={`py-1 ${
-                isSunday ? "text-red-400" : isSaturday ? "text-blue-500" : ""
-              }`}
+              className={`py-1 ${isSunday ? "text-red-400" : isSaturday ? "text-blue-500" : ""
+                }`}
             >
               {day}
             </div>
@@ -232,13 +236,12 @@ export function ScheduleCalendar({
                         className={
                           isToday
                             ? "inline-flex items-center justify-center w-5 h-5 ml-0.5 mt-0.5 pt-px tabular-nums rounded-full bg-indigo-600 text-[11px] font-semibold text-white text-center"
-                            : `inline-flex items-center justify-center w-5 h-5 ml-0.5 mt-0.5 pt-px tabular-nums text-[11px] font-semibold ${
-                                cell.date.getDay() === 0
-                                  ? "text-red-500"
-                                  : cell.date.getDay() === 6
-                                    ? "text-blue-500"
-                                    : "text-gray-500"
-                              }`
+                            : `inline-flex items-center justify-center w-5 h-5 ml-0.5 mt-0.5 pt-px tabular-nums text-[11px] font-semibold ${cell.date.getDay() === 0
+                              ? "text-red-500"
+                              : cell.date.getDay() === 6
+                                ? "text-blue-500"
+                                : "text-gray-500"
+                            }`
                         }
                       >
                         {cell.date.getDate()}

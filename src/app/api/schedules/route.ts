@@ -71,8 +71,41 @@ export const toYmd = (d: Date) => {
 };
 
 // GET /api/schedules
-export async function GET() {
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const yearParam = searchParams.get("year");
+  const monthParam = searchParams.get("month");
+
+  let whereClause = {};
+
+  if (yearParam && monthParam) {
+    const year = parseInt(yearParam, 10);
+    const month = parseInt(monthParam, 10);
+
+    // month is 1-based (1~12)
+    // RangeStart: 해당 월 1일
+    const rangeStart = new Date(Date.UTC(year, month - 1, 1));
+    // RangeEnd: 다음 달 1일
+    const rangeEnd = new Date(Date.UTC(year, month, 1));
+
+    // Overlap condition:
+    // (Schedule Start < Range End) AND (Schedule End >= Range Start)
+    // Note: If endDate is null, we assume endDate = date
+    whereClause = {
+      AND: [
+        { date: { lt: rangeEnd } },
+        {
+          OR: [
+            { endDate: { not: null, gte: rangeStart } },
+            { endDate: null, date: { gte: rangeStart } },
+          ],
+        },
+      ],
+    };
+  }
+
   const rows = await prisma.schedule.findMany({
+    where: whereClause,
     orderBy: { date: "asc" },
   });
 

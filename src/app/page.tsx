@@ -21,7 +21,17 @@ export default function HomePage() {
   const [defaultDate, setDefaultDate] = useState<string | null>(null);
   const [showDeleteToast, setShowDeleteToast] = useState(false);
 
-  const { data, isLoading, isError } = useSchedules();
+  // 현재 보고 있는 달 (초기값: 오늘)
+  const [viewDate, setViewDate] = useState(() => {
+    const now = new Date();
+    return { year: now.getFullYear(), month: now.getMonth() + 1 };
+  });
+
+  // 해당 월 데이터만 Fetch
+  const { data, isLoading, isError } = useSchedules(
+    viewDate.year,
+    viewDate.month,
+  );
   const createMutation = useCreateSchedule();
   const deleteMutation = useDeleteSchedule();
   const updateMutation = useUpdateSchedule();
@@ -80,10 +90,15 @@ export default function HomePage() {
           ) : (
             <ScheduleCalendar
               schedules={schedules}
+              year={viewDate.year}
+              month={viewDate.month}
               onScheduleClick={setSelectedSchedule}
               onDateClick={(date) => {
                 setDefaultDate(date); // "2025-12-11" 이런 형태로 들어옴
                 setIsModalOpen(true); // 일정 추가 모달 열기
+              }}
+              onMonthChange={(year, month) => {
+                setViewDate({ year, month });
               }}
             />
           )}
