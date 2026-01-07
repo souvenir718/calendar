@@ -54,7 +54,7 @@ export default function HomePage() {
   const isDeleting = deleteMutation.isPending;
 
   return (
-    <main className="min-h-screen py-8 px-4">
+    <main className="min-h-screen py-4 px-2 md:py-8 md:px-4">
       <div className="max-w-6xl mx-auto">
         {/* 헤더 */}
         <header className="flex items-center justify-between mb-4">
@@ -80,7 +80,7 @@ export default function HomePage() {
         </header>
 
         {/* 캘린더 카드 */}
-        <section className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
+        <section className="bg-white rounded-2xl shadow-sm border border-slate-200 p-2 md:p-4">
           {isLoading ? (
             <p className="text-sm text-slate-500">로딩 중...</p>
           ) : isError ? (

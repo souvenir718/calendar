@@ -235,8 +235,8 @@ export function ScheduleCalendar({
                       <span
                         className={
                           isToday
-                            ? "inline-flex items-center justify-center w-5 h-5 ml-0.5 mt-0.5 pt-px tabular-nums rounded-full bg-indigo-600 text-[11px] font-semibold text-white text-center"
-                            : `inline-flex items-center justify-center w-5 h-5 ml-0.5 mt-0.5 pt-px tabular-nums text-[11px] font-semibold ${cell.date.getDay() === 0
+                            ? "inline-flex items-center justify-center w-5 h-5 ml-0.5 mt-0.5 pt-px tabular-nums rounded-full bg-indigo-600 text-xs font-semibold text-white text-center"
+                            : `inline-flex items-center justify-center w-5 h-5 ml-0.5 mt-0.5 pt-px tabular-nums text-xs font-semibold ${cell.date.getDay() === 0
                               ? "text-red-500"
                               : cell.date.getDay() === 6
                                 ? "text-blue-500"
@@ -249,7 +249,7 @@ export function ScheduleCalendar({
                     );
                   })()}
                   {daySchedules.length > 0 && (
-                    <span className="text-[10px] text-indigo-500">
+                    <span className="text-[11px] text-indigo-500">
                       {daySchedules.length}개
                     </span>
                   )}
@@ -268,7 +268,7 @@ export function ScheduleCalendar({
                     >
                       <div className="flex-1">
                         <div className="truncate">
-                          <span className="text-[9px] md:text-[11px] font-semibold">
+                          <span className="text-[11px] font-semibold">
                             {getCategoryLabel(s.category)}
                             {s.title}
                           </span>
@@ -277,7 +277,7 @@ export function ScheduleCalendar({
                     </div>
                   ))}
                   {daySchedules.length > 3 && (
-                    <div className="text-[9px] text-gray-500">
+                    <div className="text-[10px] text-gray-500">
                       + {daySchedules.length - 3}개 더
                     </div>
                   )}
