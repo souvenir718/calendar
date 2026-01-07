@@ -165,7 +165,7 @@ export function ScheduleCalendar({
           >
             ◀
           </button>
-          <div className="text-base font-semibold text-slate-800">
+          <div className="text-sm md:text-base font-semibold text-slate-800">
             {monthLabel}
           </div>
           <button
@@ -268,7 +268,7 @@ export function ScheduleCalendar({
                     >
                       <div className="flex-1">
                         <div className="truncate">
-                          <span className="text-[11px] font-semibold">
+                          <span className="text-[9px] md:text-[11px] font-semibold">
                             {getCategoryLabel(s.category)}
                             {s.title}
                           </span>

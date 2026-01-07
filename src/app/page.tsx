@@ -59,7 +59,7 @@ export default function HomePage() {
         {/* 헤더 */}
         <header className="flex items-center justify-between mb-4">
           <div className="flex items-baseline gap-3">
-            <h1 className="text-2xl font-semibold text-slate-900">
+            <h1 className="text-xl md:text-2xl font-semibold text-slate-900">
               Fruits Calendar
             </h1>
             <span className="text-xs text-slate-500">

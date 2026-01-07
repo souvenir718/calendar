@@ -136,11 +136,10 @@ export function ScheduleDetailModal({
             type="button"
             onClick={onClose}
             disabled={isDeleting}
-            className={`text-sm ${
-              isDeleting
+            className={`text-sm ${isDeleting
                 ? "text-gray-300 cursor-not-allowed"
                 : "text-gray-500 hover:text-gray-700"
-            }`}
+              }`}
           >
             ✕
           </button>
@@ -157,9 +156,8 @@ export function ScheduleDetailModal({
                 <CategorySelect value={category} onChange={setCategory} />
               ) : (
                 <span
-                  className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                    categoryMeta?.className ?? ""
-                  }`}
+                  className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${categoryMeta?.className ?? ""
+                    }`}
                 >
                   {categoryMeta?.label ?? "기타"}
                 </span>
@@ -167,13 +165,13 @@ export function ScheduleDetailModal({
             </div>
             {isEditing ? (
               <input
-                className="w-full text-base font-semibold text-gray-900 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full text-sm md:text-base font-semibold text-gray-900 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="일정 제목을 입력하세요"
               />
             ) : (
-              <div className="text-base font-semibold text-gray-900 break-words">
+              <div className="text-sm md:text-base font-semibold text-gray-900 break-words">
                 {schedule.title}
               </div>
             )}
@@ -272,11 +270,10 @@ export function ScheduleDetailModal({
                   type="button"
                   onClick={onDelete}
                   disabled={isDeleting}
-                  className={`inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-white ${
-                    isDeleting
+                  className={`inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-white ${isDeleting
                       ? "bg-red-300 cursor-not-allowed"
                       : "bg-red-500 hover:bg-red-600"
-                  }`}
+                    }`}
                 >
                   {isDeleting && (
                     <span
@@ -293,11 +290,10 @@ export function ScheduleDetailModal({
                   type="button"
                   onClick={onClose}
                   disabled={isDeleting}
-                  className={`px-3 py-1.5 rounded-lg border text-xs ${
-                    isDeleting
+                  className={`px-3 py-1.5 rounded-lg border text-xs ${isDeleting
                       ? "border-gray-200 text-gray-300 cursor-not-allowed"
                       : "border-gray-300 text-gray-700 hover:bg-gray-100"
-                  }`}
+                    }`}
                 >
                   닫기
                 </button>
@@ -305,11 +301,10 @@ export function ScheduleDetailModal({
                   type="button"
                   onClick={handleStartEdit}
                   disabled={isDeleting}
-                  className={`px-3 py-1.5 rounded-lg border text-xs ${
-                    isDeleting
+                  className={`px-3 py-1.5 rounded-lg border text-xs ${isDeleting
                       ? "border-indigo-200 text-indigo-300 cursor-not-allowed"
                       : "border-indigo-500 text-indigo-600 hover:bg-indigo-50"
-                  }`}
+                    }`}
                 >
                   수정
                 </button>
@@ -317,11 +312,10 @@ export function ScheduleDetailModal({
                   type="button"
                   onClick={onDelete}
                   disabled={isDeleting}
-                  className={`inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-white ${
-                    isDeleting
+                  className={`inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-white ${isDeleting
                       ? "bg-red-300 cursor-not-allowed"
                       : "bg-red-500 hover:bg-red-600"
-                  }`}
+                    }`}
                 >
                   {isDeleting && (
                     <span
