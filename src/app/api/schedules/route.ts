@@ -42,13 +42,38 @@ export async function notifySlackLeave(params: {
   if (params.category === "AM_HALF") leaveLabel = "오전 반차";
   if (params.category === "PM_HALF") leaveLabel = "오후 반차";
 
-  const text = `${params.title}: ${range} ${leaveLabel} ${action}. 업무에 참고 부탁드립니다 🙇‍♂️`;
+  const text = `*${range}* ${leaveLabel} ${action}. 업무에 참고 부탁드립니다 🙇‍♂️`;
+
+  const attachments = [
+    {
+      color: "#36a64f",
+      blocks: [
+        {
+          type: "header",
+          text: {
+            type: "plain_text",
+            text: `🏖 ${params.title}`,
+            emoji: true,
+          },
+        },
+        {
+          type: "section",
+          fields: [
+            {
+              type: "mrkdwn",
+              text: text,
+            },
+          ],
+        },
+      ],
+    },
+  ];
 
   try {
     await fetch(SLACK_WEBHOOK_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text }),
+      body: JSON.stringify({ attachments }),
     });
   } catch (e) {
     // 슬랙 전송 실패가 API 성공/실패를 좌우하지 않도록 한다
