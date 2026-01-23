@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Schedule } from "@/types/schedule";
 
 const CATEGORY_LABEL_MAP: Record<string, string> = {
@@ -57,10 +57,20 @@ export function ScheduleCalendar({
   onDateClick,
   onMonthChange,
 }: ScheduleCalendarProps) {
-  // 1-based month prop -> 0-based index for Date calculations
   const monthIndex = month - 1;
 
-  const today = new Date();
+  const [today, setToday] = useState(() => new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const now = new Date();
+      if (now.getDate() !== today.getDate() || now.getMonth() !== today.getMonth()) {
+        setToday(now);
+      }
+    }, 1000 * 60 * 60 * 4); // 4시간마다 체크
+
+    return () => clearInterval(timer);
+  }, [today]);
 
   // Helper to calculate next/prev month and notify parent
   const changeMonth = (offset: number) => {
