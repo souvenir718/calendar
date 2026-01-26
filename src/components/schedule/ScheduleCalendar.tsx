@@ -15,16 +15,19 @@ const CATEGORY_LABEL_MAP: Record<string, string> = {
 };
 
 const CATEGORY_CLASS_MAP: Record<string, string> = {
-  MEETING: "bg-blue-100 text-blue-800",
-  DAY_OFF: "bg-emerald-100 text-emerald-800",
-  AM_HALF: "bg-sky-50 text-sky-700 border border-sky-200",
-  PM_HALF: "bg-indigo-50 text-indigo-700 border border-indigo-200",
+  MEETING: "bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-100",
+  DAY_OFF: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-100",
+  AM_HALF:
+    "bg-sky-50 text-sky-700 border border-sky-200 dark:bg-sky-900/30 dark:text-sky-200 dark:border-sky-800",
+  PM_HALF:
+    "bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-200 dark:border-indigo-800",
   IMPORTANT:
-    "bg-violet-50 text-violet-700 border border-violet-200 border-l-4 border-l-violet-500",
-  PAYDAY: "bg-amber-50 text-amber-700 border border-amber-200",
+    "bg-violet-50 text-violet-700 border border-violet-200 border-l-4 border-l-violet-500 dark:bg-violet-900/30 dark:text-violet-200 dark:border-violet-800 dark:border-l-violet-500",
+  PAYDAY:
+    "bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-900/30 dark:text-amber-200 dark:border-amber-800",
   HOLIDAY:
-    "bg-red-50 text-red-700 border border-red-200 border-l-4 border-l-red-500",
-  OTHER: "bg-gray-100 text-gray-800",
+    "bg-red-50 text-red-700 border border-red-200 border-l-4 border-l-red-500 dark:bg-red-900/30 dark:text-red-200 dark:border-red-800 dark:border-l-red-500",
+  OTHER: "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200",
 };
 
 function getCategoryLabel(category?: string) {
@@ -155,14 +158,14 @@ export function ScheduleCalendar({
   const weekDays = ["일", "월", "화", "수", "목", "금", "토"];
 
   return (
-    <div className="flex flex-col gap-2 bg-white">
+    <div className="flex flex-col gap-2 bg-white dark:bg-slate-800">
       {/* 달력 헤더 */}
       <div className="flex items-center justify-between mb-2 gap-2">
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={handleToday}
-            className="text-xs px-3 py-1 rounded-full border border-gray-300 bg-white hover:bg-gray-100 text-gray-700"
+            className="text-xs px-3 py-1 rounded-full border border-gray-300 bg-white hover:bg-gray-100 text-gray-700 dark:bg-slate-700 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-600 transition-colors"
           >
             오늘
           </button>
@@ -171,17 +174,17 @@ export function ScheduleCalendar({
           <button
             type="button"
             onClick={handlePrevMonth}
-            className="text-xs w-7 h-7 inline-flex items-center justify-center rounded-full border border-gray-300 bg-white hover:bg-gray-100"
+            className="text-xs w-7 h-7 inline-flex items-center justify-center rounded-full border border-gray-300 bg-white hover:bg-gray-100 dark:bg-slate-700 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-600 transition-colors"
           >
             ◀
           </button>
-          <div className="text-sm md:text-base font-semibold text-slate-800">
+          <div className="text-sm md:text-base font-semibold text-slate-800 dark:text-slate-100">
             {monthLabel}
           </div>
           <button
             type="button"
             onClick={handleNextMonth}
-            className="text-xs w-7 h-7 inline-flex items-center justify-center rounded-full border border-gray-300 bg-white hover:bg-gray-100"
+            className="text-xs w-7 h-7 inline-flex items-center justify-center rounded-full border border-gray-300 bg-white hover:bg-gray-100 dark:bg-slate-700 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-600 transition-colors"
           >
             ▶
           </button>
@@ -190,7 +193,7 @@ export function ScheduleCalendar({
       </div>
 
       {/* 요일 헤더 */}
-      <div className="grid grid-cols-7 text-center text-[11px] text-gray-500 mb-1 border-b border-gray-200 pb-1">
+      <div className="grid grid-cols-7 text-center text-[11px] text-gray-500 dark:text-gray-400 mb-1 border-b border-gray-200 dark:border-slate-700 pb-1">
         {weekDays.map((day, idx) => {
           const isSunday = idx === 0;
           const isSaturday = idx === 6;
@@ -198,7 +201,11 @@ export function ScheduleCalendar({
           return (
             <div
               key={day}
-              className={`py-1 ${isSunday ? "text-red-400" : isSaturday ? "text-blue-500" : ""
+              className={`py-1 ${isSunday
+                  ? "text-red-400 dark:text-red-300"
+                  : isSaturday
+                    ? "text-blue-500 dark:text-blue-400"
+                    : ""
                 }`}
             >
               {day}
@@ -208,14 +215,14 @@ export function ScheduleCalendar({
       </div>
 
       {/* 달력 바디 */}
-      <div className="grid grid-cols-7 gap-[2px] text-[11px]">
+      <div className="grid grid-cols-7 gap-[2px] text-[11px] bg-gray-200 dark:bg-slate-700 border border-gray-200 dark:border-slate-700 rounded-md overflow-hidden">
         {weeks.map((week, wi) =>
           week.map((cell, di) => {
             if (!cell.date) {
               return (
                 <div
                   key={`${wi}-${di}`}
-                  className="min-h-[64px] sm:min-h-[72px] md:min-h-[96px] lg:min-h-[110px] bg-gray-100 border border-gray-300 rounded-md"
+                  className="min-h-[64px] sm:min-h-[72px] md:min-h-[96px] lg:min-h-[110px] bg-gray-50 dark:bg-slate-900/50"
                 />
               );
             }
@@ -232,7 +239,7 @@ export function ScheduleCalendar({
             return (
               <div
                 key={`${wi}-${di}`}
-                className="min-h-[64px] sm:min-h-[72px] md:min-h-[96px] lg:min-h-[110px] bg-white border border-gray-300 rounded-md flex flex-col p-1 cursor-pointer"
+                className="min-h-[64px] sm:min-h-[72px] md:min-h-[96px] lg:min-h-[110px] bg-white dark:bg-slate-800 flex flex-col p-1 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors"
                 onClick={handleDateClick}
               >
                 <div className="flex items-center justify-between mb-1">
@@ -247,10 +254,10 @@ export function ScheduleCalendar({
                           isToday
                             ? "inline-flex items-center justify-center w-5 h-5 ml-0.5 mt-0.5 pt-px tabular-nums rounded-full bg-indigo-600 text-xs font-semibold text-white text-center"
                             : `inline-flex items-center justify-center w-5 h-5 ml-0.5 mt-0.5 pt-px tabular-nums text-xs font-semibold ${cell.date.getDay() === 0
-                              ? "text-red-500"
+                              ? "text-red-500 dark:text-red-400"
                               : cell.date.getDay() === 6
-                                ? "text-blue-500"
-                                : "text-gray-500"
+                                ? "text-blue-500 dark:text-blue-400"
+                                : "text-gray-500 dark:text-gray-400"
                             }`
                         }
                       >
@@ -259,7 +266,7 @@ export function ScheduleCalendar({
                     );
                   })()}
                   {daySchedules.length > 0 && (
-                    <span className="text-[11px] text-indigo-500">
+                    <span className="text-[11px] text-indigo-500 dark:text-indigo-400">
                       {daySchedules.length}개
                     </span>
                   )}
@@ -287,7 +294,7 @@ export function ScheduleCalendar({
                     </div>
                   ))}
                   {daySchedules.length > 3 && (
-                    <div className="text-[10px] text-gray-500">
+                    <div className="text-[10px] text-gray-500 dark:text-gray-400">
                       + {daySchedules.length - 3}개 더
                     </div>
                   )}

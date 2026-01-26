@@ -25,15 +25,15 @@ export function ScheduleModal({
       onClick={onClose}
     >
       <div
-        className="bg-white border border-gray-200 rounded-2xl w-full max-w-md mx-4 shadow-xl modal-fade"
+        className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl w-full max-w-md mx-4 shadow-xl modal-fade"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
-          <h3 className="text-sm font-semibold">새 일정 추가</h3>
+        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-slate-700">
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">새 일정 추가</h3>
           <button
             type="button"
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 text-sm"
+            className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 text-sm"
           >
             ✕
           </button>
@@ -110,32 +110,32 @@ function CreateScheduleForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-4 text-sm">
       <div className="space-y-1">
-        <label className="block text-xs text-gray-500">제목 *</label>
+        <label className="block text-xs text-gray-500 dark:text-gray-400">제목 *</label>
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+          className="w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500"
           placeholder="예: 주간 스프린트 회의"
         />
       </div>
 
       <div className="grid grid-cols-2 gap-2">
         <div className="space-y-1">
-          <label className="block text-xs text-gray-500">시작일 *</label>
+          <label className="block text-xs text-gray-500 dark:text-gray-400">시작일 *</label>
           <input
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            className="w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 dark:text-gray-100"
           />
         </div>
         <div className="space-y-1">
-          <label className="block text-xs text-gray-500">종료일</label>
+          <label className="block text-xs text-gray-500 dark:text-gray-400">종료일</label>
           <input
             type="date"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
-            className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            className="w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 dark:text-gray-100"
           />
         </div>
       </div>
@@ -143,22 +143,22 @@ function CreateScheduleForm({
         <div className="text-[11px] text-red-500 mt-1">{dateError}</div>
       )}
       <div className="space-y-1">
-        <label className="block text-xs text-gray-500">시간</label>
+        <label className="block text-xs text-gray-500 dark:text-gray-400">시간</label>
         <input
           type="time"
           value={time}
           onChange={(e) => setTime(e.target.value)}
-          className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+          className="w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 dark:text-gray-100"
         />
       </div>
 
       <div className="space-y-1">
-        <label className="block text-xs text-gray-500">유형</label>
+        <label className="block text-xs text-gray-500 dark:text-gray-400">유형</label>
         <div className="relative text-xs">
           <button
             type="button"
             onClick={() => setCategoryOpen((prev) => !prev)}
-            className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 hover:bg-gray-50"
+            className="w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 hover:bg-gray-50 dark:hover:bg-slate-600 text-gray-900 dark:text-gray-100 transition-colors"
           >
             <span>
               {CATEGORY_OPTIONS.find((opt) => opt.value === category)?.label}
@@ -167,7 +167,7 @@ function CreateScheduleForm({
           </button>
 
           {categoryOpen && (
-            <div className="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-auto">
+            <div className="absolute z-20 mt-1 w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg shadow-lg max-h-48 overflow-auto">
               {CATEGORY_OPTIONS.map((opt) => {
                 const isActive = opt.value === category;
                 return (
@@ -178,15 +178,14 @@ function CreateScheduleForm({
                       setCategory(opt.value as Schedule["category"]);
                       setCategoryOpen(false);
                     }}
-                    className={`w-full px-3 py-2 text-left flex items-center justify-between text-xs ${
-                      isActive
-                        ? "bg-indigo-50 text-indigo-600 font-semibold"
-                        : "text-gray-700 hover:bg-gray-50"
-                    }`}
+                    className={`w-full px-3 py-2 text-left flex items-center justify-between text-xs transition-colors ${isActive
+                        ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 font-semibold"
+                        : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700"
+                      }`}
                   >
                     <span>{opt.label}</span>
                     {isActive && (
-                      <span className="text-indigo-500 text-[11px]">✓</span>
+                      <span className="text-indigo-500 dark:text-indigo-400 text-[11px] ml-2">✓</span>
                     )}
                   </button>
                 );
@@ -197,11 +196,11 @@ function CreateScheduleForm({
       </div>
 
       <div className="space-y-1">
-        <label className="block text-xs text-gray-500">설명</label>
+        <label className="block text-xs text-gray-500 dark:text-gray-400">설명</label>
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+          className="w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500"
           rows={3}
           placeholder="간단한 상세 내용"
         />

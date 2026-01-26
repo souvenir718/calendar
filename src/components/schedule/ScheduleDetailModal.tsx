@@ -127,18 +127,18 @@ export function ScheduleDetailModal({
       onClick={isDeleting ? undefined : onClose}
     >
       <div
-        className="bg-white border border-gray-200 rounded-2xl w-full max-w-md mx-4 shadow-xl modal-fade"
+        className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl w-full max-w-md mx-4 shadow-xl modal-fade"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
-          <h3 className="text-sm font-semibold text-gray-900">일정 상세</h3>
+        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-slate-700">
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">일정 상세</h3>
           <button
             type="button"
             onClick={onClose}
             disabled={isDeleting}
             className={`text-sm ${isDeleting
-                ? "text-gray-300 cursor-not-allowed"
-                : "text-gray-500 hover:text-gray-700"
+              ? "text-gray-300 dark:text-gray-600 cursor-not-allowed"
+              : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
               }`}
           >
             ✕
@@ -149,7 +149,7 @@ export function ScheduleDetailModal({
           {/* 제목 영역 */}
           <div className="space-y-1">
             <div className="flex items-center justify-between">
-              <div className="text-[11px] font-medium text-indigo-600">
+              <div className="text-[11px] font-medium text-indigo-600 dark:text-indigo-400">
                 일정
               </div>
               {isEditing ? (
@@ -165,21 +165,21 @@ export function ScheduleDetailModal({
             </div>
             {isEditing ? (
               <input
-                className="w-full text-sm md:text-base font-semibold text-gray-900 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full text-sm md:text-base font-semibold text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 bg-white dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="일정 제목을 입력하세요"
               />
             ) : (
-              <div className="text-sm md:text-base font-semibold text-gray-900 break-words">
+              <div className="text-sm md:text-base font-semibold text-gray-900 dark:text-gray-100 break-words">
                 {schedule.title}
               </div>
             )}
           </div>
 
           {/* 날짜 / 시간 영역 */}
-          <div className="rounded-xl bg-gray-50 px-3 py-2 space-y-1">
-            <div className="flex items-center text-xs text-gray-600">
+          <div className="rounded-xl bg-gray-50 dark:bg-slate-700/50 px-3 py-2 space-y-1">
+            <div className="flex items-center text-xs text-gray-600 dark:text-gray-300">
               <span className="mr-2">📅</span>
               {isEditing ? (
                 <div className="flex items-center gap-2">
@@ -187,14 +187,14 @@ export function ScheduleDetailModal({
                     type="date"
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
-                    className="border border-gray-300 rounded-md px-2 py-1 text-xs text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="border border-gray-300 dark:border-slate-600 rounded-md px-2 py-1 text-xs text-gray-700 dark:text-gray-200 bg-white dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   />
                   <span className="text-gray-400 text-[11px]">~</span>
                   <input
                     type="date"
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
-                    className="border border-gray-300 rounded-md px-2 py-1 text-xs text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="border border-gray-300 dark:border-slate-600 rounded-md px-2 py-1 text-xs text-gray-700 dark:text-gray-200 bg-white dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   />
                 </div>
               ) : (
@@ -208,14 +208,14 @@ export function ScheduleDetailModal({
             {dateError && (
               <div className="text-[11px] text-red-500 mt-1">{dateError}</div>
             )}
-            <div className="flex items-center text-xs text-gray-600">
+            <div className="flex items-center text-xs text-gray-600 dark:text-gray-300">
               <span className="mr-2">⏰</span>
               {isEditing ? (
                 <input
                   type="time"
                   value={time}
                   onChange={(e) => setTime(e.target.value)}
-                  className="border border-gray-300 rounded-md px-2 py-1 text-xs text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="border border-gray-300 dark:border-slate-600 rounded-md px-2 py-1 text-xs text-gray-700 dark:text-gray-200 bg-white dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 />
               ) : schedule.time ? (
                 <span>{schedule.time}</span>
@@ -227,21 +227,21 @@ export function ScheduleDetailModal({
 
           {/* 설명 영역 */}
           <div className="space-y-1">
-            <div className="text-xs text-gray-500">설명</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400">설명</div>
             {isEditing ? (
               <textarea
-                className="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 whitespace-pre-wrap focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full rounded-xl border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 rows={3}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="설명을 입력하세요."
               />
             ) : schedule.description ? (
-              <div className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 whitespace-pre-wrap">
+              <div className="rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700/50 px-3 py-2 text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
                 {schedule.description}
               </div>
             ) : (
-              <div className="rounded-xl border border-dashed border-gray-200 px-3 py-2 text-xs text-gray-400">
+              <div className="rounded-xl border border-dashed border-gray-200 dark:border-slate-700 px-3 py-2 text-xs text-gray-400 dark:text-gray-500">
                 설명이 없습니다.
               </div>
             )}
@@ -254,7 +254,7 @@ export function ScheduleDetailModal({
                 <button
                   type="button"
                   onClick={handleCancelEdit}
-                  className="px-3 py-1.5 rounded-lg border border-gray-300 text-xs text-gray-700 hover:bg-gray-100"
+                  className="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-slate-700 text-xs font-medium text-gray-700 dark:text-slate-200 hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors"
                 >
                   취소
                 </button>
@@ -262,7 +262,7 @@ export function ScheduleDetailModal({
                   type="button"
                   onClick={handleSave}
                   disabled={saving || !title.trim() || !date}
-                  className="px-3 py-1.5 rounded-lg bg-indigo-500 hover:bg-indigo-600 disabled:opacity-60 text-xs font-medium text-white"
+                  className="px-3 py-1.5 rounded-lg bg-indigo-500 hover:bg-indigo-600 text-xs font-medium text-white shadow-sm transition-all active:scale-95 disabled:opacity-60 disabled:active:scale-100"
                 >
                   {saving ? "저장 중..." : "저장"}
                 </button>
@@ -270,15 +270,15 @@ export function ScheduleDetailModal({
                   type="button"
                   onClick={onDelete}
                   disabled={isDeleting}
-                  className={`inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-white ${isDeleting
-                      ? "bg-red-300 cursor-not-allowed"
-                      : "bg-red-500 hover:bg-red-600"
+                  className={`inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors ${isDeleting
+                    ? "opacity-50 cursor-not-allowed"
+                    : ""
                     }`}
                 >
                   {isDeleting && (
                     <span
                       aria-hidden
-                      className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent"
+                      className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent"
                     />
                   )}
                   {isDeleting ? "삭제 중..." : "삭제"}
@@ -290,10 +290,7 @@ export function ScheduleDetailModal({
                   type="button"
                   onClick={onClose}
                   disabled={isDeleting}
-                  className={`px-3 py-1.5 rounded-lg border text-xs ${isDeleting
-                      ? "border-gray-200 text-gray-300 cursor-not-allowed"
-                      : "border-gray-300 text-gray-700 hover:bg-gray-100"
-                    }`}
+                  className="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-slate-700 text-xs font-medium text-gray-700 dark:text-slate-200 hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors"
                 >
                   닫기
                 </button>
@@ -301,10 +298,7 @@ export function ScheduleDetailModal({
                   type="button"
                   onClick={handleStartEdit}
                   disabled={isDeleting}
-                  className={`px-3 py-1.5 rounded-lg border text-xs ${isDeleting
-                      ? "border-indigo-200 text-indigo-300 cursor-not-allowed"
-                      : "border-indigo-500 text-indigo-600 hover:bg-indigo-50"
-                    }`}
+                  className="px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 text-xs font-medium text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors"
                 >
                   수정
                 </button>
@@ -312,9 +306,9 @@ export function ScheduleDetailModal({
                   type="button"
                   onClick={onDelete}
                   disabled={isDeleting}
-                  className={`inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-white ${isDeleting
-                      ? "bg-red-300 cursor-not-allowed"
-                      : "bg-red-500 hover:bg-red-600"
+                  className={`inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-white bg-red-500 hover:bg-red-600 shadow-sm transition-all active:scale-95 ${isDeleting
+                    ? "opacity-50 cursor-not-allowed"
+                    : ""
                     }`}
                 >
                   {isDeleting && (

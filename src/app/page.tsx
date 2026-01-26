@@ -12,6 +12,7 @@ import type { Schedule } from "@/types/schedule";
 import { ScheduleCalendar } from "@/components/schedule/ScheduleCalendar";
 import { ScheduleModal } from "@/components/schedule/ScheduleModal";
 import { ScheduleDetailModal } from "@/components/schedule/ScheduleDetailModal";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function HomePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -54,35 +55,38 @@ export default function HomePage() {
   const isDeleting = deleteMutation.isPending;
 
   return (
-    <main className="min-h-screen py-4 px-2 md:py-8 md:px-4">
+    <main className="min-h-screen py-4 px-2 md:py-8 md:px-4 bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
       <div className="max-w-6xl mx-auto">
         {/* 헤더 */}
         <header className="flex items-center justify-between mb-4">
           <div className="flex items-baseline gap-3">
-            <h1 className="text-xl md:text-2xl font-semibold text-slate-900">
+            <h1 className="text-xl md:text-2xl font-semibold text-slate-900 dark:text-slate-100">
               Fruits Calendar
             </h1>
-            <span className="text-xs text-slate-500">
+            <span className="text-xs text-slate-500 dark:text-slate-400">
               {isLoading ? "불러오는 중..." : `총 ${schedules.length}개 일정`}
             </span>
           </div>
 
-          <button
-            type="button"
-            onClick={() => {
-              setDefaultDate(null);
-              setIsModalOpen(true);
-            }}
-            className="bg-indigo-500 hover:bg-indigo-400 text-sm font-medium px-4 py-2 rounded-full text-white shadow-sm"
-          >
-            + 일정 추가
-          </button>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <button
+              type="button"
+              onClick={() => {
+                setDefaultDate(null);
+                setIsModalOpen(true);
+              }}
+              className="bg-indigo-500 hover:bg-indigo-400 text-sm font-medium px-4 py-2 rounded-full text-white shadow-sm"
+            >
+              + 일정 추가
+            </button>
+          </div>
         </header>
 
         {/* 캘린더 카드 */}
-        <section className="bg-white rounded-2xl shadow-sm border border-slate-200 p-2 md:p-4">
+        <section className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-2 md:p-4">
           {isLoading ? (
-            <p className="text-sm text-slate-500">로딩 중...</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">로딩 중...</p>
           ) : isError ? (
             <p className="text-sm text-red-500">
               데이터를 불러오는 중 문제가 발생했습니다.
