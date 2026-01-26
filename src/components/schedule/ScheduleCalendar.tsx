@@ -112,6 +112,12 @@ export function ScheduleCalendar({
     weeks.push(currentWeek);
   }
 
+  // 항상 6주 높이를 맞추기 위해, 모자란 주만큼 빈 주를 채워넣음
+  while (weeks.length < 6) {
+    const emptyWeek = Array(7).fill({ date: null });
+    weeks.push(emptyWeek);
+  }
+
   const parseDate = (value: string) => {
     const [y, m, d] = value.split("-").map(Number);
     return new Date(y, (m ?? 1) - 1, d ?? 1);
@@ -158,7 +164,7 @@ export function ScheduleCalendar({
   const weekDays = ["일", "월", "화", "수", "목", "금", "토"];
 
   return (
-    <div className="flex flex-col gap-2 bg-white dark:bg-slate-800">
+    <div className="flex flex-col gap-2 bg-white dark:bg-slate-800 w-full">
       {/* 달력 헤더 */}
       <div className="flex items-center justify-between mb-2 gap-2">
         <div className="flex items-center gap-2">

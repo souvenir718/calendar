@@ -10,6 +10,7 @@ import {
 import type { Schedule } from "@/types/schedule";
 
 import { ScheduleCalendar } from "@/components/schedule/ScheduleCalendar";
+import { ScheduleCalendarSkeleton } from "@/components/schedule/ScheduleCalendarSkeleton";
 import { ScheduleModal } from "@/components/schedule/ScheduleModal";
 import { ScheduleDetailModal } from "@/components/schedule/ScheduleDetailModal";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -56,7 +57,7 @@ export default function HomePage() {
 
   return (
     <main className="h-[100dvh] overflow-hidden flex flex-col py-2 px-2 md:py-8 md:px-4 bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-6xl mx-auto w-full">
         {/* 헤더 */}
         <header className="flex items-center justify-between mb-4">
           <div className="flex items-baseline gap-3">
@@ -92,7 +93,7 @@ export default function HomePage() {
         {/* 캘린더 카드 */}
         <section className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-2 md:p-4">
           {isLoading ? (
-            <p className="text-sm text-slate-500 dark:text-slate-400">로딩 중...</p>
+            <ScheduleCalendarSkeleton />
           ) : isError ? (
             <p className="text-sm text-red-500">
               데이터를 불러오는 중 문제가 발생했습니다.
