@@ -76,9 +76,15 @@ export default function HomePage() {
                 setDefaultDate(null);
                 setIsModalOpen(true);
               }}
-              className="bg-indigo-500 hover:bg-indigo-400 text-sm font-medium px-4 py-2 rounded-full text-white shadow-sm"
+              className="bg-indigo-500 hover:bg-indigo-400 text-white shadow-sm rounded-full flex items-center justify-center w-9 h-9 sm:w-auto sm:h-auto sm:px-4 sm:py-2 transition-all"
+              aria-label="일정 추가"
             >
-              + 일정 추가
+              <span className="text-xl sm:text-base sm:mr-1 font-medium leading-none mb-0.5 sm:mb-0">
+                +
+              </span>
+              <span className="hidden sm:inline text-sm font-medium">
+                일정 추가
+              </span>
             </button>
           </div>
         </header>
