@@ -252,8 +252,8 @@ export function ScheduleCalendar({
                       <span
                         className={
                           isToday
-                            ? "inline-flex items-center justify-center w-4 h-4 md:w-5 md:h-5 ml-0.5 mt-0.5 pt-px tabular-nums rounded-full bg-indigo-600 text-[10px] md:text-xs font-semibold text-white text-center"
-                            : `inline-flex items-center justify-center w-4 h-4 md:w-5 md:h-5 ml-0.5 mt-0.5 pt-px tabular-nums text-[10px] md:text-xs font-semibold ${cell.date.getDay() === 0
+                            ? "inline-flex items-center justify-center w-4 h-4 sm:w-5 sm:h-5 ml-0.5 mt-0.5 pt-px tabular-nums rounded-full bg-indigo-600 text-[10px] sm:text-xs font-semibold text-white text-center"
+                            : `inline-flex items-center justify-center w-4 h-4 sm:w-5 sm:h-5 ml-0.5 mt-0.5 pt-px tabular-nums text-[10px] sm:text-xs font-semibold ${cell.date.getDay() === 0
                               ? "text-red-500 dark:text-red-400"
                               : cell.date.getDay() === 6
                                 ? "text-blue-500 dark:text-blue-400"
@@ -266,13 +266,13 @@ export function ScheduleCalendar({
                     );
                   })()}
                   {daySchedules.length > 0 && (
-                    <span className="text-[9px] md:text-[11px] text-indigo-500 dark:text-indigo-400">
+                    <span className="text-[9px] sm:text-[11px] text-indigo-500 dark:text-indigo-400">
                       {daySchedules.length}개
                     </span>
                   )}
                 </div>
-                {/* Desktop View (md 이상) */}
-                <div className="hidden md:block flex-1 space-y-1 overflow-hidden">
+                {/* Desktop View (sm 이상) */}
+                <div className="hidden sm:block flex-1 space-y-1 overflow-hidden">
                   {daySchedules.slice(0, 3).map((s) => (
                     <div
                       key={s.id}
@@ -301,8 +301,8 @@ export function ScheduleCalendar({
                   )}
                 </div>
 
-                {/* Mobile View (md 미만) - 작은 폰트 모드 */}
-                <div className="block md:hidden flex-1 space-y-[1px] overflow-hidden">
+                {/* Mobile View (sm 미만) - 작은 폰트 모드 */}
+                <div className="block sm:hidden flex-1 space-y-[1px] overflow-hidden">
                   {daySchedules.slice(0, 4).map((s) => (
                     <div
                       key={s.id}
