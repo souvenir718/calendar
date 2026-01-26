@@ -202,10 +202,10 @@ export function ScheduleCalendar({
             <div
               key={day}
               className={`py-1 ${isSunday
-                  ? "text-red-400 dark:text-red-300"
-                  : isSaturday
-                    ? "text-blue-500 dark:text-blue-400"
-                    : ""
+                ? "text-red-400 dark:text-red-300"
+                : isSaturday
+                  ? "text-blue-500 dark:text-blue-400"
+                  : ""
                 }`}
             >
               {day}
@@ -252,8 +252,8 @@ export function ScheduleCalendar({
                       <span
                         className={
                           isToday
-                            ? "inline-flex items-center justify-center w-5 h-5 ml-0.5 mt-0.5 pt-px tabular-nums rounded-full bg-indigo-600 text-xs font-semibold text-white text-center"
-                            : `inline-flex items-center justify-center w-5 h-5 ml-0.5 mt-0.5 pt-px tabular-nums text-xs font-semibold ${cell.date.getDay() === 0
+                            ? "inline-flex items-center justify-center w-4 h-4 md:w-5 md:h-5 ml-0.5 mt-0.5 pt-px tabular-nums rounded-full bg-indigo-600 text-[10px] md:text-xs font-semibold text-white text-center"
+                            : `inline-flex items-center justify-center w-4 h-4 md:w-5 md:h-5 ml-0.5 mt-0.5 pt-px tabular-nums text-[10px] md:text-xs font-semibold ${cell.date.getDay() === 0
                               ? "text-red-500 dark:text-red-400"
                               : cell.date.getDay() === 6
                                 ? "text-blue-500 dark:text-blue-400"
@@ -266,12 +266,13 @@ export function ScheduleCalendar({
                     );
                   })()}
                   {daySchedules.length > 0 && (
-                    <span className="text-[11px] text-indigo-500 dark:text-indigo-400">
+                    <span className="text-[9px] md:text-[11px] text-indigo-500 dark:text-indigo-400">
                       {daySchedules.length}개
                     </span>
                   )}
                 </div>
-                <div className="flex-1 space-y-1 overflow-hidden">
+                {/* Desktop View (md 이상) */}
+                <div className="hidden md:block flex-1 space-y-1 overflow-hidden">
                   {daySchedules.slice(0, 3).map((s) => (
                     <div
                       key={s.id}
@@ -296,6 +297,32 @@ export function ScheduleCalendar({
                   {daySchedules.length > 3 && (
                     <div className="text-[10px] text-gray-500 dark:text-gray-400">
                       + {daySchedules.length - 3}개 더
+                    </div>
+                  )}
+                </div>
+
+                {/* Mobile View (md 미만) - 작은 폰트 모드 */}
+                <div className="block md:hidden flex-1 space-y-[1px] overflow-hidden">
+                  {daySchedules.slice(0, 4).map((s) => (
+                    <div
+                      key={s.id}
+                      className={`rounded px-[2px] py-[1px] flex items-center cursor-pointer truncate ${getCategoryClasses(
+                        s.category,
+                      )}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onScheduleClick(s);
+                      }}
+                    >
+                      <span className="text-[7px] leading-tight font-medium truncate">
+                        {getCategoryLabel(s.category)}
+                        {s.title}
+                      </span>
+                    </div>
+                  ))}
+                  {daySchedules.length > 4 && (
+                    <div className="text-[7px] text-gray-400 pl-0.5">
+                      +{daySchedules.length - 4}
                     </div>
                   )}
                 </div>
