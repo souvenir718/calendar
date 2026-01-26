@@ -3,18 +3,15 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Providers from "./providers";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { ThemeColorSync } from "@/components/providers/ThemeColorSync";
 
 export const metadata: Metadata = {
   title: "FruitsFamily Calendar",
   description: "Fruits Calendar",
 };
 
-export const viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "white" },
-    { media: "(prefers-color-scheme: dark)", color: "#0f172a" }, // slate-900
-  ],
-};
+// viewport export removed or empty if only themeColor was there
+export const viewport = {};
 
 export default function RootLayout({
   children,
@@ -31,6 +28,7 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
+            <ThemeColorSync />
             {children}
           </ThemeProvider>
         </Providers>
