@@ -24,6 +24,7 @@ export default function HomePage() {
   const [defaultDate, setDefaultDate] = useState<string | null>(null);
   const [listModalDate, setListModalDate] = useState<string | null>(null);
   const [showDeleteToast, setShowDeleteToast] = useState(false);
+  const [isSpinning, setIsSpinning] = useState(false);
 
   // 현재 보고 있는 달 (초기값: 오늘)
   const [viewDate, setViewDate] = useState(() => {
@@ -32,7 +33,7 @@ export default function HomePage() {
   });
 
   // 해당 월 데이터만 Fetch
-  const { data, isLoading, isError, refetch } = useSchedules(
+  const { data, isLoading, isError, refetch, isRefetching } = useSchedules(
     viewDate.year,
     viewDate.month,
   );
@@ -75,7 +76,11 @@ export default function HomePage() {
             <ThemeToggle />
             {/* 모바일 전용 새로고침 버튼 */}
             <button
-              onClick={() => refetch()}
+              onClick={() => {
+                setIsSpinning(true);
+                refetch();
+                setTimeout(() => setIsSpinning(false), 500);
+              }}
               className="md:hidden p-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-gray-500 dark:text-gray-400 transition-colors"
               aria-label="새로고침"
             >
@@ -85,7 +90,7 @@ export default function HomePage() {
                 viewBox="0 0 24 24"
                 strokeWidth={1.5}
                 stroke="currentColor"
-                className="w-5 h-5"
+                className={`w-5 h-5 ${isSpinning ? "animate-spin" : ""}`}
               >
                 <path
                   strokeLinecap="round"
