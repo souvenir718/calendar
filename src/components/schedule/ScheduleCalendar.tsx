@@ -50,6 +50,7 @@ export type ScheduleCalendarProps = {
   onScheduleClick: (schedule: Schedule) => void;
   onDateClick?: (date: string) => void;
   onMonthChange: (year: number, month: number) => void;
+  onDateCountClick?: (date: string) => void;
 };
 
 export function ScheduleCalendar({
@@ -59,6 +60,7 @@ export function ScheduleCalendar({
   onScheduleClick,
   onDateClick,
   onMonthChange,
+  onDateCountClick,
 }: ScheduleCalendarProps) {
   const monthIndex = month - 1;
 
@@ -272,9 +274,16 @@ export function ScheduleCalendar({
                     );
                   })()}
                   {daySchedules.length > 0 && (
-                    <span className="text-[9px] sm:text-[11px] text-indigo-500 dark:text-indigo-400">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (onDateCountClick) onDateCountClick(key);
+                      }}
+                      className="text-[9px] sm:text-[11px] text-indigo-500 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium px-1 rounded hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors"
+                    >
                       {daySchedules.length}개
-                    </span>
+                    </button>
                   )}
                 </div>
                 {/* Desktop View (sm 이상) */}

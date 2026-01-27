@@ -13,6 +13,7 @@ import { ScheduleCalendar } from "@/components/schedule/ScheduleCalendar";
 import { ScheduleCalendarSkeleton } from "@/components/schedule/ScheduleCalendarSkeleton";
 import { ScheduleModal } from "@/components/schedule/ScheduleModal";
 import { ScheduleDetailModal } from "@/components/schedule/ScheduleDetailModal";
+import { DayScheduleListModal } from "@/components/schedule/DayScheduleListModal";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function HomePage() {
@@ -21,6 +22,7 @@ export default function HomePage() {
     null,
   );
   const [defaultDate, setDefaultDate] = useState<string | null>(null);
+  const [listModalDate, setListModalDate] = useState<string | null>(null);
   const [showDeleteToast, setShowDeleteToast] = useState(false);
 
   // 현재 보고 있는 달 (초기값: 오늘)
@@ -132,6 +134,9 @@ export default function HomePage() {
               onMonthChange={(year, month) => {
                 setViewDate({ year, month });
               }}
+              onDateCountClick={(date) => {
+                setListModalDate(date);
+              }}
             />
           )}
         </section>
@@ -163,6 +168,30 @@ export default function HomePage() {
             onUpdate={async (updated) => {
               const result = await updateMutation.mutateAsync(updated);
               setSelectedSchedule(result);
+            }}
+          />
+        )}
+
+        {/* 일정 목록 모달 (N개 클릭 시) */}
+        {listModalDate && (
+          <DayScheduleListModal
+            date={listModalDate}
+            schedules={schedules.filter((s) => {
+              if (!s.date) return false;
+              // 시작일 <= 선택일 <= 종료일(없으면 시작일) 확인
+              // 단순 날짜 문자열 비교 (YYYY-MM-DD 형식이므로 가능)
+              const target = listModalDate;
+              const start = s.date;
+              const end = s.endDate || s.date;
+              return target >= start && target <= end;
+            })}
+            onClose={() => setListModalDate(null)}
+            onScheduleClick={(s) => {
+              // 목록 모달은 닫지 않고 상세 모달을 열거나,
+              // UX에 따라 목록 모달을 닫고 상세 모달을 열 수도 있음.
+              // 여기서는 목록 모달을 닫고 상세 모달을 염.
+              setListModalDate(null);
+              setSelectedSchedule(s);
             }}
           />
         )}
