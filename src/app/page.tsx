@@ -57,7 +57,7 @@ export default function HomePage() {
 
   return (
     <main className="h-[100dvh] overflow-hidden flex flex-col py-2 px-2 md:py-8 md:px-4 bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
-      <div className="max-w-6xl mx-auto w-full">
+      <div className="max-w-6xl mx-auto w-full flex-1 flex flex-col min-h-0">
         {/* 헤더 */}
         <header className="flex items-center justify-between mb-4">
           <div className="flex items-baseline gap-3">
@@ -112,7 +112,7 @@ export default function HomePage() {
         </header>
 
         {/* 캘린더 카드 */}
-        <section className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-2 md:p-4">
+        <section className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-2 md:p-4 flex-1 flex flex-col min-h-0">
           {isLoading ? (
             <ScheduleCalendarSkeleton />
           ) : isError ? (

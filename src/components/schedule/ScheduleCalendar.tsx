@@ -164,7 +164,7 @@ export function ScheduleCalendar({
   const weekDays = ["일", "월", "화", "수", "목", "금", "토"];
 
   return (
-    <div className="flex flex-col gap-2 bg-white dark:bg-slate-800 w-full">
+    <div className="flex flex-col gap-2 bg-white dark:bg-slate-800 w-full h-full">
       {/* 달력 헤더 */}
       <div className="flex items-center justify-between mb-2 gap-2">
         <div className="flex items-center gap-2">
@@ -220,15 +220,15 @@ export function ScheduleCalendar({
         })}
       </div>
 
-      {/* 달력 바디 */}
-      <div className="grid grid-cols-7 gap-[2px] text-[11px] bg-gray-200 dark:bg-slate-700 border border-gray-200 dark:border-slate-700 rounded-md overflow-hidden">
+      {/* 달력 바디: min-h 추가 */}
+      <div className="flex-1 grid grid-cols-7 grid-rows-6 gap-[2px] text-[11px] bg-gray-200 dark:bg-slate-700 border border-gray-200 dark:border-slate-700 rounded-md overflow-hidden min-h-[480px]">
         {weeks.map((week, wi) =>
           week.map((cell, di) => {
             if (!cell.date) {
               return (
                 <div
                   key={`${wi}-${di}`}
-                  className="min-h-[64px] sm:min-h-[72px] md:min-h-[96px] lg:min-h-[110px] bg-gray-50 dark:bg-slate-900/50"
+                  className="min-h-0 bg-gray-50 dark:bg-slate-900/50"
                 />
               );
             }
@@ -245,10 +245,10 @@ export function ScheduleCalendar({
             return (
               <div
                 key={`${wi}-${di}`}
-                className="min-h-[64px] sm:min-h-[72px] md:min-h-[96px] lg:min-h-[110px] bg-white dark:bg-slate-800 flex flex-col p-1 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors"
+                className="min-h-0 bg-white dark:bg-slate-800 flex flex-col p-1 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors"
                 onClick={handleDateClick}
               >
-                <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center justify-between mb-1 shrink-0">
                   {(() => {
                     const isToday =
                       cell.date.getFullYear() === today.getFullYear() &&
@@ -308,7 +308,7 @@ export function ScheduleCalendar({
                 </div>
 
                 {/* Mobile View (sm 미만) - 작은 폰트 모드 */}
-                <div className="block sm:hidden flex-1 space-y-[1px] overflow-hidden">
+                <div className="block sm:hidden flex-1 space-y-[1px] overflow-hidden min-h-0">
                   {daySchedules.slice(0, 4).map((s) => (
                     <div
                       key={s.id}
