@@ -58,8 +58,8 @@ export default function HomePage() {
   const isDeleting = deleteMutation.isPending;
 
   return (
-    <main className="h-[100dvh] overflow-hidden flex flex-col py-2 px-2 md:py-8 md:px-4 bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
-      <div className="max-w-6xl mx-auto w-full flex-1 flex flex-col min-h-0">
+    <main className="h-[100dvh] overflow-hidden flex flex-col pt-2 md:pt-8 md:pb-8 md:px-4 bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
+      <div className="max-w-6xl mx-auto w-full flex-1 flex flex-col min-h-0 overflow-y-auto pb-24 px-2 pt-2 md:pb-0 md:px-0 md:pt-0 md:overflow-visible scrollbar-hide">
         {/* 헤더 */}
         <header className="flex items-center justify-between mb-4">
           <div className="flex items-baseline gap-3">
