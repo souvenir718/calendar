@@ -165,8 +165,45 @@ export function ScheduleCalendar({
   const monthLabel = `${year}년 ${month}월`;
   const weekDays = ["일", "월", "화", "수", "목", "금", "토"];
 
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+
+    // 모바일 뷰포트인지 확인 (tailwind sm: 640px)
+    if (window.innerWidth >= 640) return;
+
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe) {
+      handleNextMonth();
+    }
+    if (isRightSwipe) {
+      handlePrevMonth();
+    }
+  };
+
   return (
-    <div className="flex flex-col gap-2 bg-white dark:bg-slate-800 w-full h-full">
+    <div
+      className="flex flex-col gap-2 bg-white dark:bg-slate-800 w-full h-full"
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+    >
       {/* 달력 헤더 */}
       <div className="flex items-center justify-between mb-2 gap-2">
         <div className="flex items-center gap-2">
