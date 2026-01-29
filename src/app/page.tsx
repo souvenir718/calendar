@@ -119,7 +119,7 @@ export default function HomePage() {
         </header>
 
         {/* 캘린더 카드 */}
-        <section className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-2 md:p-4 flex-1 flex flex-col min-h-0">
+        <section className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-2 md:p-4 flex-1 flex flex-col">
           {isLoading ? (
             <ScheduleCalendarSkeleton />
           ) : isError ? (
