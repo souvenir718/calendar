@@ -16,7 +16,8 @@ const CATEGORY_LABEL_MAP: Record<string, string> = {
 
 const CATEGORY_CLASS_MAP: Record<string, string> = {
   MEETING: "bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-100",
-  DAY_OFF: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-100",
+  DAY_OFF:
+    "bg-emerald-100 text-emerald-800 border border-emerald-200 dark:bg-emerald-900/50 dark:text-emerald-100 dark:border-emerald-800",
   AM_HALF:
     "bg-sky-50 text-sky-700 border border-sky-200 dark:bg-sky-900/30 dark:text-sky-200 dark:border-sky-800",
   PM_HALF:
@@ -354,11 +355,11 @@ export function ScheduleCalendar({
                 </div>
 
                 {/* Mobile View (sm 미만) - 작은 폰트 모드 */}
-                <div className="block sm:hidden flex-1 space-y-[1px] overflow-hidden min-h-0">
-                  {daySchedules.slice(0, 4).map((s) => (
+                <div className="block sm:hidden flex-1 space-y-0.5 overflow-hidden min-h-0">
+                  {daySchedules.slice(0, 3).map((s) => (
                     <div
                       key={s.id}
-                      className={`rounded px-[2px] py-[1px] flex items-center cursor-pointer truncate ${getCategoryClasses(
+                      className={`rounded px-[2px] py-1 flex items-center cursor-pointer truncate ${getCategoryClasses(
                         s.category,
                       )}`}
                       onClick={(e) => {
@@ -372,9 +373,9 @@ export function ScheduleCalendar({
                       </span>
                     </div>
                   ))}
-                  {daySchedules.length > 4 && (
+                  {daySchedules.length > 3 && (
                     <div className="text-[7px] text-gray-400 pl-0.5">
-                      +{daySchedules.length - 4}
+                      +{daySchedules.length - 3}
                     </div>
                   )}
                 </div>
