@@ -112,6 +112,7 @@ function CreateScheduleForm({
       <div className="space-y-1">
         <label className="block text-xs text-gray-500 dark:text-gray-400">제목 *</label>
         <input
+          autoFocus={true}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           className="w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500"
@@ -179,8 +180,8 @@ function CreateScheduleForm({
                       setCategoryOpen(false);
                     }}
                     className={`w-full px-3 py-2 text-left flex items-center justify-between text-xs transition-colors ${isActive
-                        ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 font-semibold"
-                        : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700"
+                      ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 font-semibold"
+                      : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700"
                       }`}
                   >
                     <span>{opt.label}</span>
