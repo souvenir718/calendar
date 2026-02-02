@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { Schedule } from "@/types/schedule";
 import type { UpdateScheduleInput } from "@/lib/scheduleApi";
 import { CategorySelect } from "@/components/CategorySelect";
+import { useBackExit } from "@/hooks/useBackExit";
 
 const CATEGORY_DISPLAY: Record<
   NonNullable<Schedule["category"]>,
@@ -57,6 +58,7 @@ export function ScheduleDetailModal({
   onUpdate,
   isDeleting = false,
 }: ScheduleDetailModalProps) {
+  useBackExit(onClose);
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(schedule.title);
   const [date, setDate] = useState(schedule.date ?? "");

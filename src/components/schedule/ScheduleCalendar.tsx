@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import type { Schedule } from "@/types/schedule";
 
 const CATEGORY_LABEL_MAP: Record<string, string> = {
@@ -54,7 +54,7 @@ export type ScheduleCalendarProps = {
   onDateCountClick?: (date: string) => void;
 };
 
-export function ScheduleCalendar({
+export const ScheduleCalendar = memo(function ScheduleCalendar({
   schedules,
   year,
   month,
@@ -386,4 +386,4 @@ export function ScheduleCalendar({
       </div>
     </div>
   );
-}
+});

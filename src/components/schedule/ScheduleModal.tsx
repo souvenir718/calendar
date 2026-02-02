@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 import type { Schedule } from "@/types/schedule";
 import { CATEGORY_OPTIONS } from "@/constants/categoryOptions";
+import { useBackExit } from "@/hooks/useBackExit";
 
 export type ScheduleModalProps = {
   onClose: () => void;
@@ -19,6 +20,8 @@ export function ScheduleModal({
   loading,
   defaultDate,
 }: ScheduleModalProps) {
+  useBackExit(onClose);
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 modal-overlay-fade"

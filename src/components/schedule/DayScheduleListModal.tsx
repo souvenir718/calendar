@@ -1,6 +1,7 @@
 "use client";
 
 import type { Schedule } from "@/types/schedule";
+import { useBackExit } from "@/hooks/useBackExit";
 
 type DayScheduleListModalProps = {
     date: string;
@@ -53,6 +54,7 @@ export function DayScheduleListModal({
     onClose,
     onScheduleClick,
 }: DayScheduleListModalProps) {
+    useBackExit(onClose);
     return (
         <div
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 modal-overlay-fade"
