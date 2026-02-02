@@ -24,8 +24,16 @@ export function useExitConfirm(onCheck: () => void, enable: boolean = true) {
             }
         };
 
-        // 초기 마운트 시에도 약간의 지연을 주어 모바일 브라우저에서도 안정적으로 동작하도록 함
-        const timerId = setTimeout(installTrap, 50);
+        // 트랩 즉시 설치 (안드로이드 하드웨어 뒤로가기 버튼 지원)
+        // 지연 없이 바로 설치해야 뒤로가기를 눌렀을 때 트랩이 이미 설치되어 있음
+        installTrap();
+
+        // 안전망: 일부 브라우저에서 초기 pushState가 무시될 수 있으므로 지연 후 재확인
+        const timerId = setTimeout(() => {
+            requestAnimationFrame(() => {
+                installTrap();
+            });
+        }, 100);
 
         const handlePopState = (event: PopStateEvent) => {
             // 2. 뒤로가기 발생 (state가 pop됨)
