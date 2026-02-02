@@ -15,8 +15,6 @@ import { ScheduleModal } from "@/components/schedule/ScheduleModal";
 import { ScheduleDetailModal } from "@/components/schedule/ScheduleDetailModal";
 import { DayScheduleListModal } from "@/components/schedule/DayScheduleListModal";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { ConfirmModal } from "@/components/common/ConfirmModal";
-import { useExitConfirm } from "@/hooks/useExitConfirm";
 
 export default function HomePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -27,15 +25,6 @@ export default function HomePage() {
   const [listModalDate, setListModalDate] = useState<string | null>(null);
   const [showDeleteToast, setShowDeleteToast] = useState(false);
   const [isSpinning, setIsSpinning] = useState(false);
-  const [showExitConfirm, setShowExitConfirm] = useState(false);
-
-  // 뒤로가기 종료 확인 훅 사용
-  // 모달이 하나라도 열려있으면 exit confirm 동작을 막아야 함 (모달 닫기가 우선)
-  const isAnyModalOpen = isModalOpen || !!selectedSchedule || !!listModalDate;
-
-  const { restoreExitConfirm, confirmExit } = useExitConfirm(() => {
-    setShowExitConfirm(true);
-  }, !isAnyModalOpen);
 
   // 현재 보고 있는 달 (초기값: 오늘)
   const [viewDate, setViewDate] = useState(() => {
@@ -218,23 +207,6 @@ export default function HomePage() {
           />
         )}
 
-        {/* 앱 종료 확인 모달 */}
-        <ConfirmModal
-          isOpen={showExitConfirm}
-          title="앱 종료"
-          message={`앱을 종료하시겠습니까?\n확인 버튼을 누르면 종료됩니다.`}
-          confirmText="종료"
-          cancelText="취소"
-          onConfirm={() => {
-            confirmExit();
-            // 모바일 환경에서 window.close()가 동작하지 않을 수 있으나
-            // history.back()이 confirmExit 내부에서 호출되어 이전 페이지(또는 종료)로 이동함
-          }}
-          onCancel={() => {
-            setShowExitConfirm(false);
-            restoreExitConfirm();
-          }}
-        />
       </div>
       {showDeleteToast && (
         <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-full bg-slate-900 px-5 py-2 text-sm text-white shadow-lg">
