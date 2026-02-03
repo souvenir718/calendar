@@ -71,6 +71,7 @@ export function ScheduleDetailModal({
     schedule.category ?? "OTHER",
   );
   const [dateError, setDateError] = useState("");
+  const [showToast, setShowToast] = useState(false);
 
   const categoryKey = (schedule.category ?? "OTHER") as NonNullable<
     Schedule["category"]
@@ -132,7 +133,8 @@ export function ScheduleDetailModal({
         method: "POST",
       });
       if (!res.ok) throw new Error("Failed");
-      alert("슬랙으로 전송되었습니다!");
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 2000);
     } catch (e) {
       console.error(e);
       alert("전송에 실패했습니다.");
@@ -354,6 +356,11 @@ export function ScheduleDetailModal({
           </div>
         </div>
       </div>
+      {showToast && (
+        <div className="fixed bottom-6 left-1/2 z-[60] -translate-x-1/2 rounded-full bg-slate-900 px-5 py-2 text-sm text-white shadow-lg">
+          슬랙으로 전송되었습니다!
+        </div>
+      )}
     </div>
   );
 }
