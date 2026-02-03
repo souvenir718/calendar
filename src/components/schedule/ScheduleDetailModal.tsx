@@ -66,6 +66,7 @@ export function ScheduleDetailModal({
   const [time, setTime] = useState(schedule.time ?? "");
   const [description, setDescription] = useState(schedule.description ?? "");
   const [saving, setSaving] = useState(false);
+  const [reminding, setReminding] = useState(false);
   const [category, setCategory] = useState<Schedule["category"]>(
     schedule.category ?? "OTHER",
   );
@@ -123,6 +124,23 @@ export function ScheduleDetailModal({
     setIsEditing(false);
   };
 
+  const handleRemind = async () => {
+    if (!confirm("슬랙으로 리마인드 메시지를 보내시겠습니까?")) return;
+    setReminding(true);
+    try {
+      const res = await fetch(`/api/schedules/${schedule.id}/notify`, {
+        method: "POST",
+      });
+      if (!res.ok) throw new Error("Failed");
+      alert("슬랙으로 전송되었습니다!");
+    } catch (e) {
+      console.error(e);
+      alert("전송에 실패했습니다.");
+    } finally {
+      setReminding(false);
+    }
+  };
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 modal-overlay-fade"
@@ -133,15 +151,18 @@ export function ScheduleDetailModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-slate-700">
-          <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">일정 상세</h3>
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+            일정 상세
+          </h3>
           <button
             type="button"
             onClick={onClose}
             disabled={isDeleting}
-            className={`text-sm ${isDeleting
-              ? "text-gray-300 dark:text-gray-600 cursor-not-allowed"
-              : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
-              }`}
+            className={`text-sm ${
+              isDeleting
+                ? "text-gray-300 dark:text-gray-600 cursor-not-allowed"
+                : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+            }`}
           >
             ✕
           </button>
@@ -158,8 +179,9 @@ export function ScheduleDetailModal({
                 <CategorySelect value={category} onChange={setCategory} />
               ) : (
                 <span
-                  className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${categoryMeta?.className ?? ""
-                    }`}
+                  className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                    categoryMeta?.className ?? ""
+                  }`}
                 >
                   {categoryMeta?.label ?? "기타"}
                 </span>
@@ -272,10 +294,9 @@ export function ScheduleDetailModal({
                   type="button"
                   onClick={onDelete}
                   disabled={isDeleting}
-                  className={`inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors ${isDeleting
-                    ? "opacity-50 cursor-not-allowed"
-                    : ""
-                    }`}
+                  className={`inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors ${
+                    isDeleting ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
                 >
                   {isDeleting && (
                     <span
@@ -288,6 +309,14 @@ export function ScheduleDetailModal({
               </>
             ) : (
               <>
+                <button
+                  type="button"
+                  onClick={handleRemind}
+                  disabled={reminding || isDeleting}
+                  className="px-3 py-1.5 rounded-lg bg-orange-50 dark:bg-orange-500/10 text-xs font-medium text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-500/20 hover:bg-orange-100 dark:hover:bg-orange-500/20 transition-colors"
+                >
+                  {reminding ? "전송 중..." : "🔔 리마인드"}
+                </button>
                 <button
                   type="button"
                   onClick={onClose}
@@ -308,10 +337,9 @@ export function ScheduleDetailModal({
                   type="button"
                   onClick={onDelete}
                   disabled={isDeleting}
-                  className={`inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-white bg-red-500 hover:bg-red-600 shadow-sm transition-all active:scale-95 ${isDeleting
-                    ? "opacity-50 cursor-not-allowed"
-                    : ""
-                    }`}
+                  className={`inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-white bg-red-500 hover:bg-red-600 shadow-sm transition-all active:scale-95 ${
+                    isDeleting ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
                 >
                   {isDeleting && (
                     <span

@@ -1,99 +1,11 @@
-import { ScheduleCategory } from "@/types/schedule";
-
 export const runtime = "nodejs";
 // app/api/schedules/route.ts
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-const SLACK_WEBHOOK_URL = process.env.SLACK_WEBHOOK_URL;
-
-type LeaveCategory = Extract<
-  ScheduleCategory,
-  "DAY_OFF" | "AM_HALF" | "PM_HALF"
->;
-
-export const isLeaveCategory = (c: ScheduleCategory): c is LeaveCategory =>
-  c === "DAY_OFF" || c === "AM_HALF" || c === "PM_HALF";
-
-export async function notifySlackLeave(params: {
-  title: string;
-  date: string;
-  endDate?: string;
-  isUpdated?: boolean;
-  category: LeaveCategory;
-}) {
-  if (!SLACK_WEBHOOK_URL) return; // 설정 안 했으면 조용히 스킵
-
-  const formatKoreanDate = (ymd: string) => {
-    const [y, m, d] = ymd.split("-").map(Number);
-    const date = new Date(Date.UTC(y, m - 1, d));
-    const weekdays = ["일", "월", "화", "수", "목", "금", "토"];
-    const dayName = weekdays[date.getUTCDay()];
-    return `${y}년 ${m}월 ${d}일(${dayName})`;
-  };
-
-  const range =
-    params.endDate && params.endDate !== params.date
-      ? `${formatKoreanDate(params.date)} ~ ${formatKoreanDate(params.endDate)}`
-      : formatKoreanDate(params.date);
-
-  const action = params.isUpdated ? "로 변경되었습니다" : "사용 예정입니다";
-  let leaveLabel = "연차";
-  if (params.category === "AM_HALF") leaveLabel = "오전 반차";
-  if (params.category === "PM_HALF") leaveLabel = "오후 반차";
-
-  const text = `*${range}* ${leaveLabel} ${action}. 업무에 참고 부탁드립니다 🙇‍♂️`;
-
-  const attachments = [
-    {
-      color: "#36a64f",
-      blocks: [
-        {
-          type: "header",
-          text: {
-            type: "plain_text",
-            text: `🏖 ${params.title}`,
-            emoji: true,
-          },
-        },
-        {
-          type: "section",
-          fields: [
-            {
-              type: "mrkdwn",
-              text: text,
-            },
-          ],
-        },
-      ],
-    },
-  ];
-
-  try {
-    await fetch(SLACK_WEBHOOK_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ attachments }),
-    });
-  } catch (e) {
-    // 슬랙 전송 실패가 API 성공/실패를 좌우하지 않도록 한다
-    console.error("Slack notify failed", e);
-  }
-}
-
-// YYYY-MM-DD -> Date (UTC 기준, 날짜 밀림 방지)
-export const toDateOnly = (s: string) => {
-  const [y, m, d] = s.split("-").map(Number);
-  return new Date(Date.UTC(y, m - 1, d));
-};
-
-// Date -> YYYY-MM-DD (UTC 기준)
-export const toYmd = (d: Date) => {
-  const y = d.getUTCFullYear();
-  const m = String(d.getUTCMonth() + 1).padStart(2, "0");
-  const day = String(d.getUTCDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-};
+// notifySlackLeave removed, importing from lib/slack
+import { notifySlackLeave, isLeaveCategory } from "@/lib/slack";
+import { toDateOnly, toYmd } from "@/lib/date";
 
 // GET /api/schedules
 export async function GET(req: Request) {

@@ -4,12 +4,8 @@ export const runtime = "nodejs";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
-import {
-  isLeaveCategory,
-  notifySlackLeave,
-  toDateOnly,
-  toYmd,
-} from "@/app/api/schedules/route";
+import { isLeaveCategory, notifySlackLeave } from "@/lib/slack";
+import { toDateOnly, toYmd } from "@/lib/date";
 
 type Ctx = { params: Promise<{ id: string }> };
 
