@@ -9,11 +9,17 @@ import { useEffect, useRef } from "react";
  */
 export function useBackExit(onClose: () => void) {
     const isClosedByBack = useRef(false);
+    const onCloseRef = useRef(onClose);
+
+    useEffect(() => {
+        onCloseRef.current = onClose;
+    }, [onClose]);
 
     useEffect(() => {
         // 1. 모달 진입 시 브라우저 히스토리에 state 추가
-        // 이렇게 하면 뒤로가기 버튼을 눌렀을 때 앱이 종료되지 않고 이 state가 pop됩니다.
-        history.pushState({ modalOpen: true }, "", window.location.href);
+        // 고유 ID를 생성하여 현재 모달 인스턴스가 추가한 히스토리인지 식별합니다.
+        const modalId = Math.random().toString(36).substr(2, 9);
+        history.pushState({ modalId }, "", window.location.href);
         const mountTime = Date.now();
 
         const handlePopState = () => {
@@ -22,7 +28,7 @@ export function useBackExit(onClose: () => void) {
 
             // 2. 뒤로가기가 발생하면(히스토리가 pop되면) 모달을 닫음
             isClosedByBack.current = true;
-            onClose();
+            onCloseRef.current();
         };
 
         window.addEventListener("popstate", handlePopState);
@@ -32,10 +38,12 @@ export function useBackExit(onClose: () => void) {
 
             // 3. 컴포넌트 언마운트 시(모달 닫힘)
             // 만약 뒤로가기 버튼으로 닫힌 게 아니라면(X 버튼 등 수동 종료),
-            // 아까 추가했던 history state를 제거하기 위해 history.back() 실행
+            // 현재 히스토리 상태가 이 모달이 push한 상태일 때만 뒤로가기를 실행합니다.
             if (!isClosedByBack.current) {
-                history.back();
+                if (history.state && history.state.modalId === modalId) {
+                    history.back();
+                }
             }
         };
-    }, [onClose]);
+    }, []);
 }
