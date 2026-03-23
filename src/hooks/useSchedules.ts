@@ -15,8 +15,9 @@ export function useSchedules(year?: number, month?: number) {
   return useQuery<Schedule[]>({
     queryKey: [...SCHEDULES_KEY, year, month],
     queryFn: () => fetchSchedules(year, month),
+    staleTime: 1000 * 60 * 5, // 5분 동안 캐시 유지 (불필요한 중복 호출 방지)
     refetchInterval: 1000 * 60 * 60 * 12, // 12시간마다 자동 갱신
-    refetchOnWindowFocus: true, // 창 활성화 시 갱신
+    refetchOnWindowFocus: false, // 창 활성화 시 잦은 갱신 방지 (DB Compute 시간 절약)
   });
 }
 
