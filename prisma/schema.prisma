@@ -31,4 +31,5 @@ model Schedule {
   updatedAt   DateTime         @updatedAt
 
   @@index([date])
+  @@index([endDate])
 }

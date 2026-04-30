@@ -1,56 +1,22 @@
 export const runtime = "nodejs";
-// app/api/schedules/route.ts
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-
-// notifySlackLeave removed, importing from lib/slack
 import { notifySlackLeave, isLeaveCategory } from "@/lib/slack";
 import { toDateOnly, toYmd } from "@/lib/date";
+import { getSchedules } from "@/lib/scheduleService";
 
 // GET /api/schedules
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const yearParam = searchParams.get("year");
   const monthParam = searchParams.get("month");
-
-  let whereClause = {};
-
-  if (yearParam && monthParam) {
-    const year = parseInt(yearParam, 10);
-    const month = parseInt(monthParam, 10);
-
-    // month is 1-based (1~12)
-    // RangeStart: 해당 월 1일
-    const rangeStart = new Date(Date.UTC(year, month - 1, 1));
-    // RangeEnd: 다음 달 1일
-    const rangeEnd = new Date(Date.UTC(year, month, 1));
-
-    // Overlap condition:
-    // (Schedule Start < Range End) AND (Schedule End >= Range Start)
-    // Note: If endDate is null, we assume endDate = date
-    whereClause = {
-      AND: [
-        { date: { lt: rangeEnd } },
-        {
-          OR: [
-            { endDate: { not: null, gte: rangeStart } },
-            { endDate: null, date: { gte: rangeStart } },
-          ],
-        },
-      ],
-    };
-  }
-
-  const rows = await prisma.schedule.findMany({
-    where: whereClause,
-    orderBy: { date: "asc" },
+  const year = yearParam ? parseInt(yearParam, 10) : undefined;
+  const month = monthParam ? parseInt(monthParam, 10) : undefined;
+  const schedules = await getSchedules({
+    year,
+    month,
+    logLabel: "GET /api/schedules",
   });
-
-  const schedules = rows.map((r) => ({
-    ...r,
-    date: toYmd(r.date),
-    endDate: r.endDate ? toYmd(r.endDate) : undefined,
-  }));
 
   return NextResponse.json(schedules);
 }

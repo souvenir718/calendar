@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, memo } from "react";
+import { useState, useEffect, memo, useMemo } from "react";
 import type { Schedule } from "@/types/schedule";
 
 const CATEGORY_LABEL_MAP: Record<string, string> = {
@@ -86,41 +86,6 @@ export const ScheduleCalendar = memo(function ScheduleCalendar({
     onMonthChange(newDate.getFullYear(), newDate.getMonth() + 1);
   };
 
-  const firstDay = new Date(year, monthIndex, 1);
-  const lastDay = new Date(year, monthIndex + 1, 0);
-  const daysInMonth = lastDay.getDate();
-
-  // 일요일 시작 기준(0~6, 일:0 ~ 토:6)
-  const startWeekday = firstDay.getDay();
-
-  const weeks: { date: Date | null }[][] = [];
-  let currentWeek: { date: Date | null }[] = [];
-
-  for (let i = 0; i < startWeekday; i++) {
-    currentWeek.push({ date: null });
-  }
-
-  for (let day = 1; day <= daysInMonth; day++) {
-    currentWeek.push({ date: new Date(year, monthIndex, day) });
-    if (currentWeek.length === 7) {
-      weeks.push(currentWeek);
-      currentWeek = [];
-    }
-  }
-
-  if (currentWeek.length > 0) {
-    while (currentWeek.length < 7) {
-      currentWeek.push({ date: null });
-    }
-    weeks.push(currentWeek);
-  }
-
-  // 항상 6주 높이를 맞추기 위해, 모자란 주만큼 빈 주를 채워넣음
-  while (weeks.length < 6) {
-    const emptyWeek = Array(7).fill({ date: null });
-    weeks.push(emptyWeek);
-  }
-
   const parseDate = (value: string) => {
     const [y, m, d] = value.split("-").map(Number);
     return new Date(y, (m ?? 1) - 1, d ?? 1);
@@ -133,27 +98,62 @@ export const ScheduleCalendar = memo(function ScheduleCalendar({
     return `${y}-${m}-${dd}`;
   };
 
-  const schedulesByDate = new Map<string, Schedule[]>();
+  const weeks = useMemo(() => {
+    const firstDay = new Date(year, monthIndex, 1);
+    const lastDay = new Date(year, monthIndex + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startWeekday = firstDay.getDay();
+    const nextWeeks: { date: Date | null }[][] = [];
+    let currentWeek: { date: Date | null }[] = [];
 
-  for (const s of schedules) {
-    if (!s.date) continue;
-
-    const start = parseDate(s.date);
-    const end = s.endDate ? parseDate(s.endDate) : start;
-
-    const realEnd = end.getTime() < start.getTime() ? start : end;
-
-    for (
-      let d = new Date(start.getTime());
-      d.getTime() <= realEnd.getTime();
-      d.setDate(d.getDate() + 1)
-    ) {
-      const key = formatDateKey(d);
-      const list = schedulesByDate.get(key) ?? [];
-      list.push(s);
-      schedulesByDate.set(key, list);
+    for (let i = 0; i < startWeekday; i++) {
+      currentWeek.push({ date: null });
     }
-  }
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      currentWeek.push({ date: new Date(year, monthIndex, day) });
+      if (currentWeek.length === 7) {
+        nextWeeks.push(currentWeek);
+        currentWeek = [];
+      }
+    }
+
+    if (currentWeek.length > 0) {
+      while (currentWeek.length < 7) {
+        currentWeek.push({ date: null });
+      }
+      nextWeeks.push(currentWeek);
+    }
+
+    while (nextWeeks.length < 6) {
+      nextWeeks.push(Array.from({ length: 7 }, () => ({ date: null })));
+    }
+
+    return nextWeeks;
+  }, [monthIndex, year]);
+
+  const schedulesByDate = useMemo(() => {
+    const nextMap = new Map<string, Schedule[]>();
+
+    for (const schedule of schedules) {
+      const start = parseDate(schedule.date);
+      const end = schedule.endDate ? parseDate(schedule.endDate) : start;
+      const realEnd = end.getTime() < start.getTime() ? start : end;
+
+      for (
+        let date = new Date(start.getTime());
+        date.getTime() <= realEnd.getTime();
+        date.setDate(date.getDate() + 1)
+      ) {
+        const key = formatDateKey(date);
+        const list = nextMap.get(key) ?? [];
+        list.push(schedule);
+        nextMap.set(key, list);
+      }
+    }
+
+    return nextMap;
+  }, [schedules]);
 
   const handlePrevMonth = () => changeMonth(-1);
   const handleNextMonth = () => changeMonth(1);

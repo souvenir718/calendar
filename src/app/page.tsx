@@ -1,218 +1,31 @@
-"use client";
+import { HomePageClient } from "@/app/HomePageClient";
+import { getSchedules } from "@/lib/scheduleService";
 
-import { useState, useCallback } from "react";
-import {
-  useSchedules,
-  useCreateSchedule,
-  useDeleteSchedule,
-  useUpdateSchedule,
-} from "@/hooks/useSchedules";
-import type { Schedule } from "@/types/schedule";
+export const dynamic = "force-dynamic";
 
-import { ScheduleCalendar } from "@/components/schedule/ScheduleCalendar";
-import { ScheduleCalendarSkeleton } from "@/components/schedule/ScheduleCalendarSkeleton";
-import { ScheduleModal } from "@/components/schedule/ScheduleModal";
-import { ScheduleDetailModal } from "@/components/schedule/ScheduleDetailModal";
-import { DayScheduleListModal } from "@/components/schedule/DayScheduleListModal";
-import { ThemeToggle } from "@/components/ThemeToggle";
+function getSeoulYearMonth() {
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "numeric",
+  });
+  const parts = formatter.formatToParts(new Date());
+  const year = Number(parts.find((part) => part.type === "year")?.value);
+  const month = Number(parts.find((part) => part.type === "month")?.value);
+  return { year, month };
+}
 
-export default function HomePage() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedSchedule, setSelectedSchedule] = useState<Schedule | null>(
-    null,
-  );
-  const [defaultDate, setDefaultDate] = useState<string | null>(null);
-  const [listModalDate, setListModalDate] = useState<string | null>(null);
-  const [showDeleteToast, setShowDeleteToast] = useState(false);
-  const [isSpinning, setIsSpinning] = useState(false);
-
-  // 현재 보고 있는 달 (초기값: 오늘)
-  const [viewDate, setViewDate] = useState(() => {
-    const now = new Date();
-    return { year: now.getFullYear(), month: now.getMonth() + 1 };
+export default async function HomePage() {
+  const initialViewDate = getSeoulYearMonth();
+  const initialSchedules = await getSchedules({
+    year: initialViewDate.year,
+    month: initialViewDate.month,
   });
 
-  // 해당 월 데이터만 Fetch
-  const { data, isLoading, isError, refetch, isRefetching } = useSchedules(
-    viewDate.year,
-    viewDate.month,
-  );
-  const createMutation = useCreateSchedule();
-  const deleteMutation = useDeleteSchedule();
-  const updateMutation = useUpdateSchedule();
-
-  const schedules = data ?? [];
-
-  const handleAdd = async (
-    payload: Omit<Schedule, "id" | "createdAt" | "updatedAt">,
-  ) => {
-    await createMutation.mutateAsync(payload);
-    setIsModalOpen(false);
-  };
-
-  const handleDelete = async (id: number) => {
-    await deleteMutation.mutateAsync(id);
-    setShowDeleteToast(true);
-    setTimeout(() => setShowDeleteToast(false), 2000);
-  };
-
-  const isDeleting = deleteMutation.isPending;
-
-  const onDateClick = useCallback((date: string) => {
-    setDefaultDate(date);
-    setIsModalOpen(true);
-  }, []);
-
-  const onMonthChange = useCallback((year: number, month: number) => {
-    setViewDate({ year, month });
-  }, []);
-
-  const onDateCountClick = useCallback((date: string) => {
-    setListModalDate(date);
-  }, []);
-
   return (
-    <main className="h-[100dvh] overflow-hidden flex flex-col pt-2 md:pt-8 md:pb-8 md:px-4 bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
-      <div className="max-w-6xl mx-auto w-full flex-1 flex flex-col min-h-0 overflow-y-auto pb-24 px-2 pt-2 md:pb-0 md:px-0 md:pt-0 md:overflow-visible scrollbar-hide">
-        {/* 헤더 */}
-        <header className="flex items-center justify-between mb-4">
-          <div className="flex items-baseline gap-3">
-            <h1 className="text-xl md:text-2xl font-semibold text-slate-900 dark:text-slate-100">
-              Fruits Calendar
-            </h1>
-            <span className="text-xs text-slate-500 dark:text-slate-400">
-              {isLoading ? "불러오는 중..." : `총 ${schedules.length}개 일정`}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            {/* 모바일 전용 새로고침 버튼 */}
-            <button
-              onClick={() => {
-                setIsSpinning(true);
-                refetch();
-                setTimeout(() => setIsSpinning(false), 500);
-              }}
-              className="md:hidden p-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-gray-500 dark:text-gray-400 transition-colors"
-              aria-label="새로고침"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className={`w-5 h-5 ${isSpinning ? "animate-spin" : ""}`}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"
-                />
-              </svg>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setDefaultDate(null);
-                setIsModalOpen(true);
-              }}
-              className="bg-indigo-500 hover:bg-indigo-400 text-white shadow-sm rounded-full flex items-center justify-center w-9 h-9 sm:w-auto sm:h-auto sm:px-4 sm:py-2 transition-all"
-              aria-label="일정 추가"
-            >
-              <span className="text-xl sm:text-base sm:mr-1 font-medium leading-none mb-0.5 sm:mb-0">
-                +
-              </span>
-              <span className="hidden sm:inline text-sm font-medium">
-                일정 추가
-              </span>
-            </button>
-          </div>
-        </header>
-
-        {/* 캘린더 카드 */}
-        <section className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-2 md:p-4 flex-1 flex flex-col">
-          {isLoading ? (
-            <ScheduleCalendarSkeleton />
-          ) : isError ? (
-            <p className="text-sm text-red-500">
-              데이터를 불러오는 중 문제가 발생했습니다.
-            </p>
-          ) : (
-            <ScheduleCalendar
-              schedules={schedules}
-              year={viewDate.year}
-              month={viewDate.month}
-              onScheduleClick={setSelectedSchedule}
-              onDateClick={onDateClick}
-              onMonthChange={onMonthChange}
-              onDateCountClick={onDateCountClick}
-            />
-          )}
-        </section>
-
-        {/* 일정 추가 모달 */}
-        {isModalOpen && (
-          <ScheduleModal
-            onClose={() => setIsModalOpen(false)}
-            onSubmit={handleAdd}
-            loading={createMutation.isPending}
-            defaultDate={defaultDate}
-          />
-        )}
-
-        {/* 일정 상세 모달 */}
-        {selectedSchedule && (
-          <ScheduleDetailModal
-            schedule={selectedSchedule}
-            onClose={() => setSelectedSchedule(null)}
-            onDelete={async () => {
-              try {
-                await handleDelete(selectedSchedule.id);
-                setTimeout(() => setSelectedSchedule(null), 350);
-              } catch (e) {
-                console.error(e);
-              }
-            }}
-            isDeleting={isDeleting}
-            onUpdate={async (updated) => {
-              const result = await updateMutation.mutateAsync(updated);
-              setSelectedSchedule(result);
-            }}
-          />
-        )}
-
-        {/* 일정 목록 모달 (N개 클릭 시) */}
-        {listModalDate && (
-          <DayScheduleListModal
-            date={listModalDate}
-            schedules={schedules.filter((s) => {
-              if (!s.date) return false;
-              // 시작일 <= 선택일 <= 종료일(없으면 시작일) 확인
-              // 단순 날짜 문자열 비교 (YYYY-MM-DD 형식이므로 가능)
-              const target = listModalDate;
-              const start = s.date;
-              const end = s.endDate || s.date;
-              return target >= start && target <= end;
-            })}
-            onClose={() => setListModalDate(null)}
-            onScheduleClick={(s) => {
-              // 목록 모달은 닫지 않고 상세 모달을 열거나,
-              // UX에 따라 목록 모달을 닫고 상세 모달을 열 수도 있음.
-              // 여기서는 목록 모달을 닫고 상세 모달을 염.
-              setListModalDate(null);
-              setSelectedSchedule(s);
-            }}
-          />
-        )}
-
-      </div>
-      {showDeleteToast && (
-        <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-full bg-slate-900 px-5 py-2 text-sm text-white shadow-lg">
-          일정이 삭제되었습니다
-        </div>
-      )}
-    </main>
+    <HomePageClient
+      initialViewDate={initialViewDate}
+      initialSchedules={initialSchedules}
+    />
   );
 }
