@@ -62,7 +62,7 @@ export async function getSchedules({
 
   const rows = await prisma.schedule.findMany({
     where: whereClause,
-    orderBy: { date: "asc" },
+    orderBy: [{ date: "asc" }, { id: "asc" }],
   });
 
   const durationMs = performance.now() - startedAt;
