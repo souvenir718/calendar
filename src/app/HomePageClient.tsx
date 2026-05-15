@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
 import {
   useSchedules,
   useCreateSchedule,
@@ -20,15 +20,47 @@ type ViewDate = {
   month: number;
 };
 
-type HomePageClientProps = {
-  initialViewDate: ViewDate;
-  initialSchedules: Schedule[];
-};
+const EMPTY_MONTH_KEY = "";
 
-export function HomePageClient({
-  initialViewDate,
-  initialSchedules,
-}: HomePageClientProps) {
+function subscribeToMonthStore() {
+  return () => {};
+}
+
+function getSeoulYearMonthKey() {
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "numeric",
+  });
+  const parts = formatter.formatToParts(new Date());
+  const year = Number(parts.find((part) => part.type === "year")?.value);
+  const month = Number(parts.find((part) => part.type === "month")?.value);
+
+  return `${year}-${month}`;
+}
+
+function getServerMonthKey() {
+  return EMPTY_MONTH_KEY;
+}
+
+function useCurrentSeoulYearMonth(): ViewDate | null {
+  const monthKey = useSyncExternalStore(
+    subscribeToMonthStore,
+    getSeoulYearMonthKey,
+    getServerMonthKey,
+  );
+
+  return useMemo(() => {
+    if (monthKey === EMPTY_MONTH_KEY) {
+      return null;
+    }
+
+    const [year, month] = monthKey.split("-").map(Number);
+    return { year, month };
+  }, [monthKey]);
+}
+
+export function HomePageClient() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedSchedule, setSelectedSchedule] = useState<Schedule | null>(
     null,
@@ -37,16 +69,17 @@ export function HomePageClient({
   const [listModalDate, setListModalDate] = useState<string | null>(null);
   const [showDeleteToast, setShowDeleteToast] = useState(false);
   const [isSpinning, setIsSpinning] = useState(false);
-  const [viewDate, setViewDate] = useState(initialViewDate);
-
-  const isInitialMonth =
-    viewDate.year === initialViewDate.year && viewDate.month === initialViewDate.month;
+  const currentViewDate = useCurrentSeoulYearMonth();
+  const [selectedViewDate, setSelectedViewDate] = useState<ViewDate | null>(
+    null,
+  );
+  const viewDate = selectedViewDate ?? currentViewDate;
 
   const { data, isLoading, isError, refetch } = useSchedules(
-    viewDate.year,
-    viewDate.month,
+    viewDate?.year,
+    viewDate?.month,
     {
-      initialData: isInitialMonth ? initialSchedules : undefined,
+      enabled: viewDate !== null,
     },
   );
   const createMutation = useCreateSchedule();
@@ -54,6 +87,7 @@ export function HomePageClient({
   const updateMutation = useUpdateSchedule();
 
   const schedules = useMemo(() => data ?? [], [data]);
+  const isCalendarLoading = viewDate === null || isLoading;
 
   const selectedDaySchedules = useMemo(() => {
     if (!listModalDate) {
@@ -86,7 +120,7 @@ export function HomePageClient({
   }, []);
 
   const onMonthChange = useCallback((year: number, month: number) => {
-    setViewDate({ year, month });
+    setSelectedViewDate({ year, month });
   }, []);
 
   const onDateCountClick = useCallback((date: string) => {
@@ -102,7 +136,9 @@ export function HomePageClient({
               Fruits Calendar
             </h1>
             <span className="text-xs text-slate-500 dark:text-slate-400">
-              {isLoading ? "불러오는 중..." : `총 ${schedules.length}개 일정`}
+              {isCalendarLoading
+                ? "불러오는 중..."
+                : `총 ${schedules.length}개 일정`}
             </span>
           </div>
 
@@ -115,6 +151,7 @@ export function HomePageClient({
                   setTimeout(() => setIsSpinning(false), 300);
                 });
               }}
+              disabled={viewDate === null || isSpinning}
               className="md:hidden p-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-gray-500 dark:text-gray-400 transition-colors"
               aria-label="새로고침"
             >
@@ -153,7 +190,7 @@ export function HomePageClient({
         </header>
 
         <section className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-2 md:p-4 flex-1 flex flex-col">
-          {isLoading ? (
+          {isCalendarLoading ? (
             <ScheduleCalendarSkeleton />
           ) : isError ? (
             <p className="text-sm text-red-500">

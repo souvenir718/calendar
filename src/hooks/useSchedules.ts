@@ -12,6 +12,7 @@ import type { Schedule } from "@/types/schedule";
 const SCHEDULES_KEY = ["schedules"];
 
 type UseSchedulesOptions = {
+  enabled?: boolean;
   initialData?: Schedule[];
 };
 
@@ -23,6 +24,7 @@ export function useSchedules(
   return useQuery<Schedule[]>({
     queryKey: [...SCHEDULES_KEY, year, month],
     queryFn: () => fetchSchedules(year, month),
+    enabled: options?.enabled ?? true,
     initialData: options?.initialData,
     staleTime: 1000 * 60 * 5, // 5분 동안 캐시 유지 (불필요한 중복 호출 방지)
     refetchInterval: 1000 * 60 * 60 * 12, // 12시간마다 자동 갱신
