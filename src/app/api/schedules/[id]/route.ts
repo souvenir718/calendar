@@ -1,9 +1,11 @@
 export const runtime = "nodejs";
 
 // app/api/schedules/[id]/route.ts
+import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import { SCHEDULES_CACHE_TAG } from "@/lib/scheduleCache";
 import { isLeaveCategory, notifySlackLeave } from "@/lib/slack";
 import { toDateOnly, toYmd } from "@/lib/date";
 
@@ -50,6 +52,8 @@ export async function PATCH(req: Request, context: Ctx) {
       });
     }
 
+    revalidateTag(SCHEDULES_CACHE_TAG, { expire: 0 });
+
     return NextResponse.json({
       ...updated,
       date: toYmd(updated.date),
@@ -80,6 +84,8 @@ export async function DELETE(_req: Request, context: Ctx) {
     if (result.count === 0) {
       return new NextResponse("Not found", { status: 404 });
     }
+
+    revalidateTag(SCHEDULES_CACHE_TAG, { expire: 0 });
 
     return new NextResponse(null, { status: 204 });
   } catch (e: unknown) {

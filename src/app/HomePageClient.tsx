@@ -60,7 +60,15 @@ function useCurrentSeoulYearMonth(): ViewDate | null {
   }, [monthKey]);
 }
 
-export function HomePageClient() {
+type HomePageClientProps = {
+  initialViewDate: ViewDate;
+  initialSchedules: Schedule[];
+};
+
+export function HomePageClient({
+  initialViewDate,
+  initialSchedules,
+}: HomePageClientProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedSchedule, setSelectedSchedule] = useState<Schedule | null>(
     null,
@@ -73,13 +81,18 @@ export function HomePageClient() {
   const [selectedViewDate, setSelectedViewDate] = useState<ViewDate | null>(
     null,
   );
-  const viewDate = selectedViewDate ?? currentViewDate;
+  const viewDate = selectedViewDate ?? currentViewDate ?? initialViewDate;
+  const initialQueryData =
+    viewDate.year === initialViewDate.year &&
+    viewDate.month === initialViewDate.month
+      ? initialSchedules
+      : undefined;
 
   const { data, isLoading, isError, refetch } = useSchedules(
-    viewDate?.year,
-    viewDate?.month,
+    viewDate.year,
+    viewDate.month,
     {
-      enabled: viewDate !== null,
+      initialData: initialQueryData,
     },
   );
   const createMutation = useCreateSchedule();
@@ -87,7 +100,7 @@ export function HomePageClient() {
   const updateMutation = useUpdateSchedule();
 
   const schedules = useMemo(() => data ?? [], [data]);
-  const isCalendarLoading = viewDate === null || isLoading;
+  const isCalendarLoading = isLoading;
 
   const selectedDaySchedules = useMemo(() => {
     if (!listModalDate) {
@@ -151,7 +164,7 @@ export function HomePageClient() {
                   setTimeout(() => setIsSpinning(false), 300);
                 });
               }}
-              disabled={viewDate === null || isSpinning}
+              disabled={isSpinning}
               className="md:hidden p-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-gray-500 dark:text-gray-400 transition-colors"
               aria-label="새로고침"
             >

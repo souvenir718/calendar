@@ -1,9 +1,10 @@
 export const runtime = "nodejs";
+import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { notifySlackLeave, isLeaveCategory } from "@/lib/slack";
-import { toDateOnly, toYmd } from "@/lib/date";
-import { getSchedules } from "@/lib/scheduleService";
+import {
+  getCachedSchedules,
+  SCHEDULES_CACHE_TAG,
+} from "@/lib/scheduleCache";
 
 // GET /api/schedules
 export async function GET(req: Request) {
@@ -12,11 +13,7 @@ export async function GET(req: Request) {
   const monthParam = searchParams.get("month");
   const year = yearParam ? parseInt(yearParam, 10) : undefined;
   const month = monthParam ? parseInt(monthParam, 10) : undefined;
-  const schedules = await getSchedules({
-    year,
-    month,
-    logLabel: "GET /api/schedules",
-  });
+  const schedules = await getCachedSchedules(year, month);
 
   return NextResponse.json(schedules);
 }
@@ -24,6 +21,9 @@ export async function GET(req: Request) {
 // POST /api/schedules
 export async function POST(req: Request) {
   try {
+    const { prisma } = await import("@/lib/prisma");
+    const { isLeaveCategory, notifySlackLeave } = await import("@/lib/slack");
+    const { toDateOnly, toYmd } = await import("@/lib/date");
     const body = await req.json();
 
     if (!body.title || !body.date) {
@@ -50,6 +50,8 @@ export async function POST(req: Request) {
         category: created.category,
       });
     }
+
+    revalidateTag(SCHEDULES_CACHE_TAG, { expire: 0 });
 
     return NextResponse.json(
       {
