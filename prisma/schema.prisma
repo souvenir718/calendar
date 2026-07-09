@@ -27,9 +27,23 @@ model Schedule {
   time        String?
   description String?
   category    ScheduleCategory @default(OTHER)
+  employeeId  Int?
+  employee    Employee?        @relation(fields: [employeeId], references: [id])
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
 
   @@index([date])
   @@index([endDate])
+  @@index([employeeId])
+}
+
+model Employee {
+  id         Int       @id @default(autoincrement())
+  name       String
+  email      String?   @unique
+  joinedAt   DateTime? @db.Date
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  schedules Schedule[]
 }

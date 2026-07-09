@@ -23,11 +23,30 @@ export async function PATCH(req: Request, context: Ctx) {
 
     const body = await req.json();
 
+    const employeeId =
+      body.employeeId === null
+        ? null
+        : body.employeeId
+          ? Number(body.employeeId)
+          : undefined;
+
+    let title = body.title ?? undefined;
+
+    if (employeeId && isLeaveCategory(body.category)) {
+      const employee = await prisma.employee.findUnique({
+        where: { id: employeeId },
+      });
+      if (!employee) {
+        return new NextResponse("사원을 찾을 수 없습니다.", { status: 400 });
+      }
+      title = employee.name;
+    }
+
     const updated = await prisma.schedule.update({
       where: { id },
       data: {
         // 필드가 없으면 업데이트하지 않도록 undefined 유지
-        title: body.title ?? undefined,
+        title,
         description: body.description ?? undefined,
         time: body.time ?? undefined,
         category: body.category ?? undefined,
@@ -38,6 +57,7 @@ export async function PATCH(req: Request, context: Ctx) {
             : body.endDate
               ? toDateOnly(body.endDate)
               : undefined,
+        employeeId,
       },
     });
 

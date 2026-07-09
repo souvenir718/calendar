@@ -79,6 +79,7 @@ export async function getSchedules({
     endDate: row.endDate ? toYmd(row.endDate) : undefined,
     time: row.time ?? undefined,
     category: row.category,
+    employeeId: row.employeeId ?? undefined,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   }));

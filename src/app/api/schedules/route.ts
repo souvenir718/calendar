@@ -26,18 +26,32 @@ export async function POST(req: Request) {
     const { toDateOnly, toYmd } = await import("@/lib/date");
     const body = await req.json();
 
-    if (!body.title || !body.date) {
+    const employeeId = body.employeeId ? Number(body.employeeId) : null;
+    let title = body.title;
+
+    if (employeeId && isLeaveCategory(body.category)) {
+      const employee = await prisma.employee.findUnique({
+        where: { id: employeeId },
+      });
+      if (!employee) {
+        return new NextResponse("사원을 찾을 수 없습니다.", { status: 400 });
+      }
+      title = employee.name;
+    }
+
+    if (!title || !body.date) {
       return new NextResponse("title, date는 필수입니다.", { status: 400 });
     }
 
     const created = await prisma.schedule.create({
       data: {
-        title: body.title,
+        title,
         description: body.description ?? null,
         date: toDateOnly(body.date),
         endDate: body.endDate ? toDateOnly(body.endDate) : null,
         time: body.time ?? null,
         category: body.category ?? "OTHER",
+        employeeId,
       },
     });
 

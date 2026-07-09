@@ -16,6 +16,14 @@ export type Schedule = {
   endDate?: string | null;
   time?: string;
   category?: ScheduleCategory;
+  employeeId?: number | null;
   createdAt: string;
   updatedAt: string;
+};
+
+export type Employee = {
+  id: number;
+  name: string;
+  email?: string | null;
+  joinedAt?: string | null;
 };
