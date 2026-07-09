@@ -56,7 +56,7 @@ export async function POST(req: Request) {
     });
 
     // 휴가/반차 등록 시 슬랙 알림
-    if (isLeaveCategory(created.category)) {
+    if (isLeaveCategory(created.category) && body.sendSlack !== false) {
       await notifySlackLeave({
         title: created.title,
         date: toYmd(created.date),

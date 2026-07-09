@@ -15,7 +15,9 @@ const LEAVE_CATEGORIES: ReadonlySet<Schedule["category"]> = new Set([
 export type ScheduleModalProps = {
   onClose: () => void;
   onSubmit: (
-    payload: Omit<Schedule, "id" | "createdAt" | "updatedAt">,
+    payload: Omit<Schedule, "id" | "createdAt" | "updatedAt"> & {
+      sendSlack?: boolean;
+    },
   ) => Promise<void> | void;
   loading?: boolean;
   defaultDate?: string | null;
@@ -65,7 +67,9 @@ export function ScheduleModal({
 
 type CreateScheduleFormProps = {
   onAdd: (
-    payload: Omit<Schedule, "id" | "createdAt" | "updatedAt">,
+    payload: Omit<Schedule, "id" | "createdAt" | "updatedAt"> & {
+      sendSlack?: boolean;
+    },
   ) => Promise<void> | void;
   loading?: boolean;
   defaultDate?: string | null;
@@ -83,6 +87,7 @@ function CreateScheduleForm({
   const [time, setTime] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState<Schedule["category"]>("DAY_OFF");
+  const [sendSlack, setSendSlack] = useState(true);
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [employeeOpen, setEmployeeOpen] = useState(false);
   const [dateError, setDateError] = useState("");
@@ -123,6 +128,7 @@ function CreateScheduleForm({
       description: description || undefined,
       category: category || undefined,
       employeeId: isLeave ? (employeeId ?? undefined) : undefined,
+      sendSlack: isLeave ? sendSlack : undefined,
     });
 
     setTitle("");
@@ -132,6 +138,7 @@ function CreateScheduleForm({
     setTime("");
     setDescription("");
     setCategory("DAY_OFF");
+    setSendSlack(true);
     setCategoryOpen(false);
     setEmployeeOpen(false);
   };
@@ -234,6 +241,16 @@ function CreateScheduleForm({
               </div>
             )}
           </div>
+
+          <label className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300 pt-1">
+            <input
+              type="checkbox"
+              checked={sendSlack}
+              onChange={(e) => setSendSlack(e.target.checked)}
+              className="rounded border-gray-300 dark:border-slate-600 text-indigo-500 focus:ring-indigo-500"
+            />
+            슬랙 알림 보내기
+          </label>
         </div>
       ) : (
         <div className="space-y-1">

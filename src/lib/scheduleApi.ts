@@ -5,7 +5,7 @@ const BASE_URL = "/api/schedules";
 export type CreateScheduleInput = Omit<
   Schedule,
   "id" | "createdAt" | "updatedAt"
->;
+> & { sendSlack?: boolean };
 
 export type UpdateScheduleInput = Omit<Schedule, "createdAt" | "updatedAt">;
 
