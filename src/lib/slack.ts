@@ -1,6 +1,7 @@
 import { ScheduleCategory } from "@/types/schedule";
 
-const SLACK_WEBHOOK_URL = process.env.SLACK_WEBHOOK_URL;
+// const SLACK_WEBHOOK_URL = process.env.SLACK_WEBHOOK_URL
+const SLACK_WEBHOOK_URL = process.env.SLACK_GENERAL_WEBHOOK_URL;
 
 type LeaveCategory = Extract<
   ScheduleCategory,
