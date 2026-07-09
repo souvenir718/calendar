@@ -1,11 +1,18 @@
 "use client";
 
-import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import {
   useSchedules,
   useCreateSchedule,
   useDeleteSchedule,
   useUpdateSchedule,
+  usePrefetchAdjacentSchedules,
 } from "@/hooks/useSchedules";
 import type { Schedule } from "@/types/schedule";
 import { ScheduleCalendar } from "@/components/schedule/ScheduleCalendar";
@@ -101,6 +108,18 @@ export function HomePageClient({
 
   const schedules = useMemo(() => data ?? [], [data]);
   const isCalendarLoading = isLoading;
+
+  const prefetchAdjacentSchedules = usePrefetchAdjacentSchedules(
+    viewDate.year,
+    viewDate.month,
+  );
+
+  useEffect(() => {
+    if (isLoading) {
+      return;
+    }
+    prefetchAdjacentSchedules();
+  }, [isLoading, prefetchAdjacentSchedules]);
 
   const selectedDaySchedules = useMemo(() => {
     if (!listModalDate) {

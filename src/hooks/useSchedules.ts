@@ -1,4 +1,10 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useCallback } from "react";
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  keepPreviousData,
+} from "@tanstack/react-query";
 import {
   fetchSchedules,
   createSchedule,
@@ -29,7 +35,34 @@ export function useSchedules(
     staleTime: 1000 * 60 * 5, // 5분 동안 캐시 유지 (불필요한 중복 호출 방지)
     refetchInterval: 1000 * 60 * 60 * 12, // 12시간마다 자동 갱신
     refetchOnWindowFocus: false, // 창 활성화 시 잦은 갱신 방지 (DB Compute 시간 절약)
+    placeholderData: keepPreviousData, // 월 전환 시 이전 달 데이터를 유지해 화면이 비지 않도록 함
   });
+}
+
+function getAdjacentYearMonth(year: number, month: number, offset: number) {
+  const date = new Date(year, month - 1 + offset, 1);
+  return { year: date.getFullYear(), month: date.getMonth() + 1 };
+}
+
+export function usePrefetchAdjacentSchedules(year?: number, month?: number) {
+  const queryClient = useQueryClient();
+
+  return useCallback(() => {
+    if (!year || !month) {
+      return;
+    }
+
+    [-1, 1].forEach((offset) => {
+      const { year: adjacentYear, month: adjacentMonth } =
+        getAdjacentYearMonth(year, month, offset);
+
+      void queryClient.prefetchQuery({
+        queryKey: [...SCHEDULES_KEY, adjacentYear, adjacentMonth],
+        queryFn: () => fetchSchedules(adjacentYear, adjacentMonth),
+        staleTime: 1000 * 60 * 5,
+      });
+    });
+  }, [queryClient, year, month]);
 }
 
 export function useCreateSchedule() {
