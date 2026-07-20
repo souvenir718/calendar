@@ -32,9 +32,9 @@ export function useSchedules(
     queryFn: () => fetchSchedules(year, month),
     enabled: options?.enabled ?? true,
     initialData: options?.initialData,
-    staleTime: 1000 * 60 * 5, // 5분 동안 캐시 유지 (불필요한 중복 호출 방지)
-    refetchInterval: 1000 * 60 * 60 * 12, // 12시간마다 자동 갱신
-    refetchOnWindowFocus: false, // 창 활성화 시 잦은 갱신 방지 (DB Compute 시간 절약)
+    staleTime: 1000 * 30, // 30초 동안 캐시 유지 (다른 모니터 최신화를 위해 단축)
+    refetchInterval: 1000 * 60, // 60초마다 자동 갱신 (다른 모니터 데이터 최신화)
+    refetchOnWindowFocus: true, // 창 활성화 시 즉시 갱신 (Next 캐시 태그로 DB 부하 최소)
     placeholderData: keepPreviousData, // 월 전환 시 이전 달 데이터를 유지해 화면이 비지 않도록 함
   });
 }
