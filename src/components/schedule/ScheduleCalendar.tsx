@@ -3,6 +3,43 @@
 import { memo, useEffect, useMemo, useState } from "react";
 import type { Schedule } from "@/types/schedule";
 
+const SEOUL_TIME_ZONE = "Asia/Seoul";
+
+type SeoulNow = {
+  year: number;
+  month: number; // 0-based, matches Date#getMonth()
+  day: number;
+  msUntilMidnight: number;
+};
+
+function getSeoulNow(): SeoulNow {
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: SEOUL_TIME_ZONE,
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+    second: "numeric",
+    hour12: false,
+  });
+  const parts = formatter.formatToParts(new Date());
+  const get = (type: Intl.DateTimeFormatPartTypes) =>
+    Number(parts.find((part) => part.type === type)?.value ?? 0);
+
+  const hour = get("hour") % 24;
+  const minute = get("minute");
+  const second = get("second");
+  const msPastMidnight = ((hour * 60 + minute) * 60 + second) * 1000;
+
+  return {
+    year: get("year"),
+    month: get("month") - 1,
+    day: get("day"),
+    msUntilMidnight: 24 * 60 * 60 * 1000 - msPastMidnight,
+  };
+}
+
 const CATEGORY_LABEL_MAP: Record<string, string> = {
   MEETING: "미팅",
   DAY_OFF: "연차",
@@ -140,23 +177,24 @@ export const ScheduleCalendar = memo(function ScheduleCalendar({
   onDateCountClick,
 }: ScheduleCalendarProps) {
   const monthIndex = month - 1;
-  const [today, setToday] = useState(() => new Date());
+  const [today, setToday] = useState(() => getSeoulNow());
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      const now = new Date();
-      if (
-        now.getDate() !== today.getDate() ||
-        now.getMonth() !== today.getMonth()
-      ) {
-        setToday(now);
-      }
-    }, 1000 * 60 * 60 * 4);
+    let timer: ReturnType<typeof setTimeout>;
 
-    return () => clearInterval(timer);
-  }, [today]);
+    const scheduleNextUpdate = () => {
+      const now = getSeoulNow();
+      setToday(now);
+      // add a 1s buffer so the timer fires just after midnight, not before it
+      timer = setTimeout(scheduleNextUpdate, now.msUntilMidnight + 1000);
+    };
+
+    scheduleNextUpdate();
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const weeks = useMemo(() => {
     const firstDay = new Date(year, monthIndex, 1);
@@ -334,8 +372,8 @@ export const ScheduleCalendar = memo(function ScheduleCalendar({
   };
 
   const handleToday = () => {
-    const now = new Date();
-    onMonthChange(now.getFullYear(), now.getMonth() + 1);
+    const now = getSeoulNow();
+    onMonthChange(now.year, now.month + 1);
   };
 
   const monthLabel = `${year}년 ${month}월`;
@@ -448,9 +486,9 @@ export const ScheduleCalendar = memo(function ScheduleCalendar({
                 const allDaySchedules = allSchedulesByDate.get(dateKey) ?? [];
                 const listSchedules = listSchedulesByDate.get(dateKey) ?? [];
                 const isToday =
-                  cell.date.getFullYear() === today.getFullYear() &&
-                  cell.date.getMonth() === today.getMonth() &&
-                  cell.date.getDate() === today.getDate();
+                  cell.date.getFullYear() === today.year &&
+                  cell.date.getMonth() === today.month &&
+                  cell.date.getDate() === today.day;
 
                 return (
                   <div
