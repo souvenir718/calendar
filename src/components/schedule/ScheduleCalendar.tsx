@@ -1,23 +1,34 @@
 "use client";
 
-import { memo, useEffect, useMemo, useState } from "react";
+import { memo, useMemo, useState, useSyncExternalStore } from "react";
 import type { Schedule } from "@/types/schedule";
 
 const SEOUL_TIME_ZONE = "Asia/Seoul";
+const EMPTY_DATE_KEY = "";
 
-type SeoulNow = {
+type SeoulToday = {
   year: number;
   month: number; // 0-based, matches Date#getMonth()
   day: number;
-  msUntilMidnight: number;
 };
 
-function getSeoulNow(): SeoulNow {
+function getSeoulDateKey() {
   const formatter = new Intl.DateTimeFormat("en-CA", {
     timeZone: SEOUL_TIME_ZONE,
     year: "numeric",
     month: "numeric",
     day: "numeric",
+  });
+  return formatter.format(new Date());
+}
+
+function getServerDateKey() {
+  return EMPTY_DATE_KEY;
+}
+
+function getMsUntilSeoulMidnight() {
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: SEOUL_TIME_ZONE,
     hour: "numeric",
     minute: "numeric",
     second: "numeric",
@@ -32,12 +43,40 @@ function getSeoulNow(): SeoulNow {
   const second = get("second");
   const msPastMidnight = ((hour * 60 + minute) * 60 + second) * 1000;
 
-  return {
-    year: get("year"),
-    month: get("month") - 1,
-    day: get("day"),
-    msUntilMidnight: 24 * 60 * 60 * 1000 - msPastMidnight,
+  return 24 * 60 * 60 * 1000 - msPastMidnight;
+}
+
+function subscribeToSeoulDateChange(callback: () => void) {
+  let timer: ReturnType<typeof setTimeout>;
+
+  const scheduleNext = () => {
+    // add a 1s buffer so the timer fires just after midnight, not before it
+    timer = setTimeout(() => {
+      callback();
+      scheduleNext();
+    }, getMsUntilSeoulMidnight() + 1000);
   };
+
+  scheduleNext();
+
+  return () => clearTimeout(timer);
+}
+
+function useSeoulToday(): SeoulToday | null {
+  const dateKey = useSyncExternalStore(
+    subscribeToSeoulDateChange,
+    getSeoulDateKey,
+    getServerDateKey,
+  );
+
+  return useMemo(() => {
+    if (dateKey === EMPTY_DATE_KEY) {
+      return null;
+    }
+
+    const [year, month, day] = dateKey.split("-").map(Number);
+    return { year, month: month - 1, day };
+  }, [dateKey]);
 }
 
 const CATEGORY_LABEL_MAP: Record<string, string> = {
@@ -177,24 +216,9 @@ export const ScheduleCalendar = memo(function ScheduleCalendar({
   onDateCountClick,
 }: ScheduleCalendarProps) {
   const monthIndex = month - 1;
-  const [today, setToday] = useState(() => getSeoulNow());
+  const today = useSeoulToday();
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
-
-  useEffect(() => {
-    let timer: ReturnType<typeof setTimeout>;
-
-    const scheduleNextUpdate = () => {
-      const now = getSeoulNow();
-      setToday(now);
-      // add a 1s buffer so the timer fires just after midnight, not before it
-      timer = setTimeout(scheduleNextUpdate, now.msUntilMidnight + 1000);
-    };
-
-    scheduleNextUpdate();
-
-    return () => clearTimeout(timer);
-  }, []);
 
   const weeks = useMemo(() => {
     const firstDay = new Date(year, monthIndex, 1);
@@ -372,8 +396,8 @@ export const ScheduleCalendar = memo(function ScheduleCalendar({
   };
 
   const handleToday = () => {
-    const now = getSeoulNow();
-    onMonthChange(now.year, now.month + 1);
+    const [year, month] = getSeoulDateKey().split("-").map(Number);
+    onMonthChange(year, month);
   };
 
   const monthLabel = `${year}년 ${month}월`;
@@ -486,6 +510,7 @@ export const ScheduleCalendar = memo(function ScheduleCalendar({
                 const allDaySchedules = allSchedulesByDate.get(dateKey) ?? [];
                 const listSchedules = listSchedulesByDate.get(dateKey) ?? [];
                 const isToday =
+                  today !== null &&
                   cell.date.getFullYear() === today.year &&
                   cell.date.getMonth() === today.month &&
                   cell.date.getDate() === today.day;
