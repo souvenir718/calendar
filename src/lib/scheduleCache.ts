@@ -16,6 +16,6 @@ export const getCachedSchedules = unstable_cache(
   ["schedules"],
   {
     tags: [SCHEDULES_CACHE_TAG],
-    revalidate: 60,
+    revalidate: 60 * 6,
   },
 );
