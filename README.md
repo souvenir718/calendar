@@ -7,7 +7,7 @@
 - **Framework**: [Next.js 15+](https://nextjs.org/) (App Router)
 - **Language**: TypeScript
 - **Styling**: [Tailwind CSS](https://tailwindcss.com/)
-- **Database**: PostgreSQL
+- **Database**: PostgreSQL ([Supabase](https://supabase.com/))
 - **ORM**: [Prisma](https://www.prisma.io/)
 - **State Management / Data Fetching**: [TanStack Query (React Query)](https://tanstack.com/query/latest)
 - **Deployment**: Vercel (권장)
@@ -50,8 +50,11 @@ bun install
 
 ```env
 # Prisma 데이터베이스 연결 URL
-DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE?schema=public"
-DIRECT_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE?schema=public"
+# DATABASE_URL: 앱 런타임용 — Supabase Transaction pooler (포트 6543, pgbouncer=true)
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:6543/DATABASE?pgbouncer=true"
+# DIRECT_URL: 마이그레이션 전용 — 반드시 Session pooler/Direct connection (포트 5432)
+# ⚠️ 트랜잭션 풀러(6543)로 migrate deploy를 돌리면 advisory lock을 못 잡아 무한 대기에 걸립니다.
+DIRECT_URL="postgresql://USER:PASSWORD@HOST:5432/DATABASE"
 ```
 
 ### 3. 데이터베이스 설정
@@ -65,6 +68,11 @@ npx prisma generate
 # 데이터베이스 스키마 푸시 (개발 환경)
 npx prisma db push
 ```
+
+> ⚠️ **스키마 드리프트 주의**: `prisma/migrations` 폴더가 실제 운영 DB의 전체 이력을 보장하지 않을 수 있습니다.
+> 과거 `db push`로 마이그레이션 파일 없이 스키마가 바뀐 이력이 있어(`Employee` 테이블, `AM_HALF`/`PM_HALF`/`HOLIDAY` 카테고리 등),
+> 새 DB에 스키마를 셋업할 땐 `prisma migrate deploy` 대신 `prisma migrate dev`로 드리프트를 새 마이그레이션으로 캡처하거나,
+> 최소한 `prisma db push`로 현재 `schema.prisma` 기준으로 동기화하세요.
 
 ### 4. 개발 서버 실행
 
