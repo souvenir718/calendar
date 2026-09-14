@@ -4,7 +4,7 @@ import { useState } from "react";
 import type { Schedule } from "@/types/schedule";
 import type { UpdateScheduleInput } from "@/lib/scheduleApi";
 import { CategorySelect } from "@/components/CategorySelect";
-import { useBackExit } from "@/hooks/useBackExit";
+import { ModalShell } from "./ModalShell";
 
 const CATEGORY_DISPLAY: Record<
   NonNullable<Schedule["category"]>,
@@ -58,13 +58,15 @@ export function ScheduleDetailModal({
   onUpdate,
   isDeleting = false,
 }: ScheduleDetailModalProps) {
-  useBackExit(onClose);
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(schedule.title);
   const [date, setDate] = useState(schedule.date ?? "");
   const [endDate, setEndDate] = useState(schedule.endDate ?? "");
   const [time, setTime] = useState(schedule.time ?? "");
   const [description, setDescription] = useState(schedule.description ?? "");
+  const [saveError, setSaveError] = useState("");
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
   const [saving, setSaving] = useState(false);
   const [reminding, setReminding] = useState(false);
   const [category, setCategory] = useState<Schedule["category"]>(
@@ -84,6 +86,7 @@ export function ScheduleDetailModal({
 
   const handleCancelEdit = () => {
     setIsEditing(false);
+    setSaveError("");
     setTitle(schedule.title);
     setDate(schedule.date ?? "");
     setEndDate(schedule.endDate ?? "");
@@ -111,18 +114,37 @@ export function ScheduleDetailModal({
       setDateError("");
     }
 
+    if (saving || isDeleting) return;
+    setSaveError("");
     setSaving(true);
-    await onUpdate({
-      id: schedule.id,
-      title: trimmedTitle,
-      date,
-      endDate: endDate || undefined,
-      time: time || undefined,
-      description: description || undefined,
-      category,
-    });
-    setSaving(false);
-    setIsEditing(false);
+    try {
+      await onUpdate({
+        id: schedule.id,
+        title: trimmedTitle,
+        date,
+        endDate: endDate || undefined,
+        time: time || undefined,
+        description: description || undefined,
+        category,
+      });
+      setIsEditing(false);
+    } catch {
+      setSaveError(
+        "저장하지 못했습니다. 입력 내용은 유지됩니다. 다시 저장해주세요.",
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (saving || isDeleting) return;
+    setDeleteError("");
+    try {
+      await onDelete();
+    } catch {
+      setDeleteError("삭제하지 못했습니다. 다시 시도해주세요.");
+    }
   };
 
   const handleRemind = async () => {
@@ -144,216 +166,249 @@ export function ScheduleDetailModal({
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 modal-overlay-fade"
-      onClick={isDeleting ? undefined : onClose}
-    >
-      <div
-        className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl w-full max-w-md mx-4 shadow-xl modal-fade"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-slate-700">
-          <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-            일정 상세
-          </h3>
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isDeleting}
-            className={`text-sm ${
-              isDeleting
-                ? "text-gray-300 dark:text-gray-600 cursor-not-allowed"
-                : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
-            }`}
-          >
-            ✕
-          </button>
+    <ModalShell label="일정 상세" onClose={onClose} busy={saving || isDeleting}>
+      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-slate-700">
+        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+          일정 상세
+        </h3>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="닫기"
+          disabled={isDeleting || saving}
+          className={`text-sm ${
+            isDeleting
+              ? "text-gray-300 dark:text-gray-600 cursor-not-allowed"
+              : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+          }`}
+        >
+          ✕
+        </button>
+      </div>
+
+      <div className="p-4 space-y-4 text-sm">
+        {/* 제목 영역 */}
+        <div className="space-y-1">
+          <div className="flex items-center justify-between">
+            <div className="text-[11px] font-medium text-indigo-600 dark:text-indigo-400">
+              일정
+            </div>
+            {isEditing ? (
+              <CategorySelect value={category} onChange={setCategory} />
+            ) : (
+              <span
+                className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                  categoryMeta?.className ?? ""
+                }`}
+              >
+                {categoryMeta?.label ?? "기타"}
+              </span>
+            )}
+          </div>
+          {isEditing ? (
+            <input
+              className="w-full text-sm md:text-base font-semibold text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 bg-white dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="일정 제목을 입력하세요"
+            />
+          ) : (
+            <div className="text-sm md:text-base font-semibold text-gray-900 dark:text-gray-100 break-words">
+              {schedule.title}
+            </div>
+          )}
         </div>
 
-        <div className="p-4 space-y-4 text-sm">
-          {/* 제목 영역 */}
-          <div className="space-y-1">
-            <div className="flex items-center justify-between">
-              <div className="text-[11px] font-medium text-indigo-600 dark:text-indigo-400">
-                일정
-              </div>
-              {isEditing ? (
-                <CategorySelect value={category} onChange={setCategory} />
-              ) : (
-                <span
-                  className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                    categoryMeta?.className ?? ""
-                  }`}
-                >
-                  {categoryMeta?.label ?? "기타"}
-                </span>
-              )}
-            </div>
+        {/* 날짜 / 시간 영역 */}
+        <div className="rounded-xl bg-gray-50 dark:bg-slate-700/50 px-3 py-2 space-y-1">
+          <div className="flex items-center text-xs text-gray-600 dark:text-gray-300">
+            <span className="mr-2">📅</span>
             {isEditing ? (
-              <input
-                className="w-full text-sm md:text-base font-semibold text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 bg-white dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="일정 제목을 입력하세요"
-              />
-            ) : (
-              <div className="text-sm md:text-base font-semibold text-gray-900 dark:text-gray-100 break-words">
-                {schedule.title}
-              </div>
-            )}
-          </div>
-
-          {/* 날짜 / 시간 영역 */}
-          <div className="rounded-xl bg-gray-50 dark:bg-slate-700/50 px-3 py-2 space-y-1">
-            <div className="flex items-center text-xs text-gray-600 dark:text-gray-300">
-              <span className="mr-2">📅</span>
-              {isEditing ? (
-                <div className="flex items-center gap-2">
-                  <input
-                    type="date"
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
-                    className="border border-gray-300 dark:border-slate-600 rounded-md px-2 py-1 text-xs text-gray-700 dark:text-gray-200 bg-white dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  />
-                  <span className="text-gray-400 text-[11px]">~</span>
-                  <input
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    className="border border-gray-300 dark:border-slate-600 rounded-md px-2 py-1 text-xs text-gray-700 dark:text-gray-200 bg-white dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  />
-                </div>
-              ) : (
-                <span>
-                  {schedule.endDate && schedule.endDate !== schedule.date
-                    ? `${schedule.date} ~ ${schedule.endDate}`
-                    : schedule.date}
-                </span>
-              )}
-            </div>
-            {dateError && (
-              <div className="text-[11px] text-red-500 mt-1">{dateError}</div>
-            )}
-            <div className="flex items-center text-xs text-gray-600 dark:text-gray-300">
-              <span className="mr-2">⏰</span>
-              {isEditing ? (
+              <div className="flex items-center gap-2">
                 <input
-                  type="time"
-                  value={time}
-                  onChange={(e) => setTime(e.target.value)}
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
                   className="border border-gray-300 dark:border-slate-600 rounded-md px-2 py-1 text-xs text-gray-700 dark:text-gray-200 bg-white dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 />
-              ) : schedule.time ? (
-                <span>{schedule.time}</span>
-              ) : (
-                <span className="text-gray-400">시간 정보 없음</span>
-              )}
+                <span className="text-gray-400 text-[11px]">~</span>
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="border border-gray-300 dark:border-slate-600 rounded-md px-2 py-1 text-xs text-gray-700 dark:text-gray-200 bg-white dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              </div>
+            ) : (
+              <span>
+                {schedule.endDate && schedule.endDate !== schedule.date
+                  ? `${schedule.date} ~ ${schedule.endDate}`
+                  : schedule.date}
+              </span>
+            )}
+          </div>
+          {dateError && (
+            <div className="text-[11px] text-red-500 mt-1">{dateError}</div>
+          )}
+          <div className="flex items-center text-xs text-gray-600 dark:text-gray-300">
+            <span className="mr-2">⏰</span>
+            {isEditing ? (
+              <input
+                type="time"
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+                className="border border-gray-300 dark:border-slate-600 rounded-md px-2 py-1 text-xs text-gray-700 dark:text-gray-200 bg-white dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              />
+            ) : schedule.time ? (
+              <span>{schedule.time}</span>
+            ) : (
+              <span className="text-gray-400">시간 정보 없음</span>
+            )}
+          </div>
+        </div>
+
+        {/* 설명 영역 */}
+        <div className="space-y-1">
+          <div className="text-xs text-gray-500 dark:text-gray-400">설명</div>
+          {isEditing ? (
+            <textarea
+              className="w-full rounded-xl border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              rows={3}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="설명을 입력하세요."
+            />
+          ) : schedule.description ? (
+            <div className="rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700/50 px-3 py-2 text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
+              {schedule.description}
+            </div>
+          ) : (
+            <div className="rounded-xl border border-dashed border-gray-200 dark:border-slate-700 px-3 py-2 text-xs text-gray-400 dark:text-gray-500">
+              설명이 없습니다.
+            </div>
+          )}
+        </div>
+
+        {saveError && (
+          <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+            {saveError}
+          </p>
+        )}
+        {deleteError && (
+          <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+            {deleteError}
+          </p>
+        )}
+        {confirmDelete && (
+          <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4 space-y-3">
+            <p role="alert" className="text-sm text-red-800 dark:text-red-200">
+              “{schedule.title}” 일정을 삭제할까요? 삭제한 일정은 복구할 수
+              없습니다.
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                autoFocus
+                type="button"
+                disabled={isDeleting}
+                onClick={() => setConfirmDelete(false)}
+                className="min-h-11 px-4 rounded-lg bg-white dark:bg-slate-700 text-sm text-slate-800 dark:text-slate-100"
+              >
+                삭제 취소
+              </button>
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={handleDelete}
+                className="min-h-11 px-4 rounded-lg bg-red-600 text-white text-sm disabled:opacity-50"
+              >
+                {isDeleting ? "삭제 중..." : "삭제 확인"}
+              </button>
             </div>
           </div>
-
-          {/* 설명 영역 */}
-          <div className="space-y-1">
-            <div className="text-xs text-gray-500 dark:text-gray-400">설명</div>
-            {isEditing ? (
-              <textarea
-                className="w-full rounded-xl border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                rows={3}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="설명을 입력하세요."
-              />
-            ) : schedule.description ? (
-              <div className="rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700/50 px-3 py-2 text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
-                {schedule.description}
-              </div>
-            ) : (
-              <div className="rounded-xl border border-dashed border-gray-200 dark:border-slate-700 px-3 py-2 text-xs text-gray-400 dark:text-gray-500">
-                설명이 없습니다.
-              </div>
-            )}
-          </div>
-
-          {/* 액션 버튼 */}
-          <div className="flex justify-end gap-2 pt-3">
-            {isEditing ? (
-              <>
-                <button
-                  type="button"
-                  onClick={handleCancelEdit}
-                  className="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-slate-700 text-xs font-medium text-gray-700 dark:text-slate-200 hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors"
-                >
-                  취소
-                </button>
-                <button
-                  type="button"
-                  onClick={handleSave}
-                  disabled={saving || !title.trim() || !date}
-                  className="px-3 py-1.5 rounded-lg bg-indigo-500 hover:bg-indigo-600 text-xs font-medium text-white shadow-sm transition-all active:scale-95 disabled:opacity-60 disabled:active:scale-100"
-                >
-                  {saving ? "저장 중..." : "저장"}
-                </button>
-                <button
-                  type="button"
-                  onClick={onDelete}
-                  disabled={isDeleting}
-                  className={`inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors ${
-                    isDeleting ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
-                >
-                  {isDeleting && (
-                    <span
-                      aria-hidden
-                      className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent"
-                    />
-                  )}
-                  {isDeleting ? "삭제 중..." : "삭제"}
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  type="button"
-                  onClick={handleRemind}
-                  disabled={reminding || isDeleting}
-                  className="px-3 py-1.5 rounded-lg bg-orange-50 dark:bg-orange-500/10 text-xs font-medium text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-500/20 hover:bg-orange-100 dark:hover:bg-orange-500/20 transition-colors"
-                >
-                  {reminding ? "전송 중..." : "🔔 리마인드"}
-                </button>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  disabled={isDeleting}
-                  className="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-slate-700 text-xs font-medium text-gray-700 dark:text-slate-200 hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors"
-                >
-                  닫기
-                </button>
-                <button
-                  type="button"
-                  onClick={handleStartEdit}
-                  disabled={isDeleting}
-                  className="px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 text-xs font-medium text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors"
-                >
-                  수정
-                </button>
-                <button
-                  type="button"
-                  onClick={onDelete}
-                  disabled={isDeleting}
-                  className={`inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-white bg-red-500 hover:bg-red-600 shadow-sm transition-all active:scale-95 ${
-                    isDeleting ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
-                >
-                  {isDeleting && (
-                    <span
-                      aria-hidden
-                      className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent"
-                    />
-                  )}
-                  {isDeleting ? "삭제 중..." : "삭제"}
-                </button>
-              </>
-            )}
-          </div>
+        )}
+        {/* 액션 버튼 */}
+        <div
+          className={confirmDelete ? "hidden" : "flex justify-end gap-2 pt-3"}
+        >
+          {isEditing ? (
+            <>
+              <button
+                type="button"
+                onClick={handleCancelEdit}
+                disabled={saving || isDeleting}
+                className="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-slate-700 text-xs font-medium text-gray-700 dark:text-slate-200 hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors"
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={saving || isDeleting || !title.trim() || !date}
+                className="px-3 py-1.5 rounded-lg bg-indigo-500 hover:bg-indigo-600 text-xs font-medium text-white shadow-sm transition-all active:scale-95 disabled:opacity-60 disabled:active:scale-100"
+              >
+                {saving ? "저장 중..." : "저장"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirmDelete(true)}
+                disabled={isDeleting || saving}
+                className={`inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors ${
+                  isDeleting ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+              >
+                {isDeleting && (
+                  <span
+                    aria-hidden
+                    className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent"
+                  />
+                )}
+                {isDeleting ? "삭제 중..." : "삭제"}
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={handleRemind}
+                disabled={reminding || isDeleting}
+                className="px-3 py-1.5 rounded-lg bg-orange-50 dark:bg-orange-500/10 text-xs font-medium text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-500/20 hover:bg-orange-100 dark:hover:bg-orange-500/20 transition-colors"
+              >
+                {reminding ? "전송 중..." : "🔔 리마인드"}
+              </button>
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={isDeleting || saving}
+                className="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-slate-700 text-xs font-medium text-gray-700 dark:text-slate-200 hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors"
+              >
+                닫기
+              </button>
+              <button
+                type="button"
+                onClick={handleStartEdit}
+                disabled={isDeleting || saving}
+                className="px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 text-xs font-medium text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors"
+              >
+                수정
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirmDelete(true)}
+                disabled={isDeleting || saving}
+                className={`inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-white bg-red-500 hover:bg-red-600 shadow-sm transition-all active:scale-95 ${
+                  isDeleting ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+              >
+                {isDeleting && (
+                  <span
+                    aria-hidden
+                    className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent"
+                  />
+                )}
+                {isDeleting ? "삭제 중..." : "삭제"}
+              </button>
+            </>
+          )}
         </div>
       </div>
       {showToast && (
@@ -361,6 +416,6 @@ export function ScheduleDetailModal({
           슬랙으로 전송되었습니다!
         </div>
       )}
-    </div>
+    </ModalShell>
   );
 }

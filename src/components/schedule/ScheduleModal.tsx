@@ -3,7 +3,7 @@
 import { FormEvent, useState } from "react";
 import type { Schedule } from "@/types/schedule";
 import { CATEGORY_OPTIONS } from "@/constants/categoryOptions";
-import { useBackExit } from "@/hooks/useBackExit";
+import { ModalShell } from "./ModalShell";
 import { useEmployees } from "@/hooks/useEmployees";
 
 const LEAVE_CATEGORIES: ReadonlySet<Schedule["category"]> = new Set([
@@ -29,39 +29,31 @@ export function ScheduleModal({
   loading,
   defaultDate,
 }: ScheduleModalProps) {
-  useBackExit(onClose);
-
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 modal-overlay-fade"
-      onClick={onClose}
-    >
-      <div
-        className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl w-full max-w-md mx-4 shadow-xl modal-fade"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-slate-700">
-          <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-            새 일정 추가
-          </h3>
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 text-sm"
-          >
-            ✕
-          </button>
-        </div>
-
-        <div className="p-4">
-          <CreateScheduleForm
-            onAdd={onSubmit}
-            loading={loading}
-            defaultDate={defaultDate}
-          />
-        </div>
+    <ModalShell label="새 일정 추가" onClose={onClose} busy={loading}>
+      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-slate-700">
+        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+          새 일정 추가
+        </h3>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="닫기"
+          disabled={loading}
+          className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 text-sm"
+        >
+          ✕
+        </button>
       </div>
-    </div>
+
+      <div className="p-4">
+        <CreateScheduleForm
+          onAdd={onSubmit}
+          loading={loading}
+          defaultDate={defaultDate}
+        />
+      </div>
+    </ModalShell>
   );
 }
 

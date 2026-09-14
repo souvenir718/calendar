@@ -255,12 +255,8 @@ export function HomePageClient({
             schedule={selectedSchedule}
             onClose={() => setSelectedSchedule(null)}
             onDelete={async () => {
-              try {
-                await handleDelete(selectedSchedule.id);
-                setTimeout(() => setSelectedSchedule(null), 350);
-              } catch (error) {
-                console.error(error);
-              }
+              await handleDelete(selectedSchedule.id);
+              setSelectedSchedule(null);
             }}
             isDeleting={deleteMutation.isPending}
             onUpdate={async (updated) => {
