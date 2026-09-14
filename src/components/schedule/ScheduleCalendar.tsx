@@ -217,6 +217,16 @@ export const ScheduleCalendar = memo(function ScheduleCalendar({
 }: ScheduleCalendarProps) {
   const monthIndex = month - 1;
   const today = useSeoulToday();
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const monthPrefix = `${year}-${String(month).padStart(2, "0")}`;
+  const todayKey = today
+    ? `${today.year}-${String(today.month + 1).padStart(2, "0")}-${String(today.day).padStart(2, "0")}`
+    : null;
+  const activeDate = selectedDate?.startsWith(monthPrefix + "-")
+    ? selectedDate
+    : todayKey?.startsWith(monthPrefix + "-")
+      ? todayKey
+      : `${monthPrefix}-01`;
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
@@ -336,7 +346,9 @@ export const ScheduleCalendar = memo(function ScheduleCalendar({
             continuesAfter: item.end.getTime() > weekEnd.getTime(),
           };
         })
-        .filter((segment): segment is Omit<WeekSegment, "row"> => segment !== null)
+        .filter(
+          (segment): segment is Omit<WeekSegment, "row"> => segment !== null,
+        )
         .sort((left, right) => {
           if (left.startCol !== right.startCol) {
             return left.startCol - right.startCol;
@@ -372,7 +384,11 @@ export const ScheduleCalendar = memo(function ScheduleCalendar({
 
       const reservedRowsByColumn = Array<number>(7).fill(0);
       for (const segment of segments) {
-        for (let column = segment.startCol; column <= segment.endCol; column++) {
+        for (
+          let column = segment.startCol;
+          column <= segment.endCol;
+          column++
+        ) {
           reservedRowsByColumn[column] = Math.max(
             reservedRowsByColumn[column],
             segment.row + 1,
@@ -396,6 +412,7 @@ export const ScheduleCalendar = memo(function ScheduleCalendar({
   };
 
   const handleToday = () => {
+    setSelectedDate(null);
     const [year, month] = getSeoulDateKey().split("-").map(Number);
     onMonthChange(year, month);
   };
@@ -446,6 +463,7 @@ export const ScheduleCalendar = memo(function ScheduleCalendar({
         <div className="flex items-center gap-2">
           <button
             type="button"
+            aria-label="이전 달"
             onClick={() => changeMonth(-1)}
             className="text-xs w-7 h-7 inline-flex items-center justify-center rounded-full border border-gray-300 bg-white hover:bg-gray-100 dark:bg-slate-700 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-600 transition-colors"
           >
@@ -456,6 +474,7 @@ export const ScheduleCalendar = memo(function ScheduleCalendar({
           </div>
           <button
             type="button"
+            aria-label="다음 달"
             onClick={() => changeMonth(1)}
             className="text-xs w-7 h-7 inline-flex items-center justify-center rounded-full border border-gray-300 bg-white hover:bg-gray-100 dark:bg-slate-700 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-600 transition-colors"
           >
@@ -487,7 +506,7 @@ export const ScheduleCalendar = memo(function ScheduleCalendar({
         })}
       </div>
 
-      <div className="flex-1 grid grid-rows-6 gap-[2px] text-[11px] bg-gray-200 dark:bg-slate-700 border border-gray-200 dark:border-slate-700 rounded-md overflow-hidden min-h-[540px] md:min-h-[600px]">
+      <div className="hidden sm:grid flex-1 grid-rows-6 gap-[2px] text-[11px] bg-gray-200 dark:bg-slate-700 border border-gray-200 dark:border-slate-700 rounded-md overflow-hidden min-h-[540px] md:min-h-[600px]">
         {weeks.map((week, weekIndex) => {
           const layout = weekLayouts[weekIndex];
 
@@ -518,12 +537,15 @@ export const ScheduleCalendar = memo(function ScheduleCalendar({
                 return (
                   <div
                     key={`${weekIndex}-${dayIndex}`}
-                    className="min-h-0 bg-white dark:bg-slate-800 flex flex-col p-1 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors"
-                    onClick={() => {
-                      if (onDateClick) onDateClick(dateKey);
-                    }}
+                    className="relative min-h-0 bg-white dark:bg-slate-800 flex flex-col p-1 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors"
                   >
-                    <div className="flex items-center justify-between mb-1 shrink-0">
+                    <button
+                      type="button"
+                      aria-label={`${dateKey} 일정 추가`}
+                      className="absolute inset-0 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500"
+                      onClick={() => onDateClick?.(dateKey)}
+                    />
+                    <div className="relative pointer-events-none flex items-center justify-between mb-1 shrink-0">
                       <span
                         className={
                           isToday
@@ -539,14 +561,15 @@ export const ScheduleCalendar = memo(function ScheduleCalendar({
                       >
                         {cell.date.getDate()}
                       </span>
-                    {allDaySchedules.length > 0 && (
+                      {allDaySchedules.length > 0 && (
                         <button
                           type="button"
                           onClick={(event) => {
                             event.stopPropagation();
                             if (onDateCountClick) onDateCountClick(dateKey);
                           }}
-                          className="text-[9px] sm:text-[11px] text-indigo-500 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium px-1 rounded hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors"
+                          aria-label={`${dateKey} 일정 ${allDaySchedules.length}개 보기`}
+                          className="pointer-events-auto text-[9px] sm:text-[11px] text-indigo-500 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium px-1 rounded hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors"
                         >
                           {allDaySchedules.length}개
                         </button>
@@ -556,15 +579,18 @@ export const ScheduleCalendar = memo(function ScheduleCalendar({
                     {layout.reservedHeights[dayIndex] > 0 && (
                       <div
                         className="shrink-0"
-                        style={{ height: `${layout.reservedHeights[dayIndex]}px` }}
+                        style={{
+                          height: `${layout.reservedHeights[dayIndex]}px`,
+                        }}
                       />
                     )}
 
-                    <div className="hidden sm:block flex-1 space-y-1 overflow-hidden">
+                    <div className="relative pointer-events-none hidden sm:block flex-1 space-y-1 overflow-hidden">
                       {listSchedules.slice(0, 3).map((schedule) => (
-                        <div
+                        <button
+                          type="button"
                           key={schedule.id}
-                          className={`rounded px-1 py-[2px] flex items-start justify-between gap-1 cursor-pointer ${getCategoryClasses(
+                          className={`pointer-events-auto w-full text-left rounded px-1 py-[2px] flex items-start justify-between gap-1 cursor-pointer ${getCategoryClasses(
                             schedule.category,
                           )}`}
                           onClick={(event) => {
@@ -580,36 +606,11 @@ export const ScheduleCalendar = memo(function ScheduleCalendar({
                               </span>
                             </div>
                           </div>
-                        </div>
+                        </button>
                       ))}
                       {listSchedules.length > 3 && (
                         <div className="text-[10px] text-gray-500 dark:text-gray-400">
                           + {listSchedules.length - 3}개 더
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="block sm:hidden flex-1 space-y-0.5 overflow-hidden min-h-0">
-                      {listSchedules.slice(0, 2).map((schedule) => (
-                        <div
-                          key={schedule.id}
-                          className={`rounded px-[2px] py-1 flex items-center cursor-pointer truncate ${getCategoryClasses(
-                            schedule.category,
-                          )}`}
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            onScheduleClick(schedule);
-                          }}
-                        >
-                          <span className="text-[7px] leading-tight font-medium truncate">
-                            {getCategoryLabel(schedule.category)}
-                            {schedule.title}
-                          </span>
-                        </div>
-                      ))}
-                      {listSchedules.length > 2 && (
-                        <div className="text-[7px] text-gray-400 pl-0.5">
-                          +{listSchedules.length - 2}
                         </div>
                       )}
                     </div>
@@ -648,6 +649,108 @@ export const ScheduleCalendar = memo(function ScheduleCalendar({
             </div>
           );
         })}
+      </div>
+      <div className="sm:hidden">
+        <div className="grid grid-cols-7 gap-1" aria-label="날짜 선택">
+          {weeks
+            .filter((week) => week.some((cell) => cell.date))
+            .flat()
+            .map((cell, index) => {
+              if (!cell.key || !cell.date)
+                return <div key={`empty-${index}`} />;
+              const key = cell.key;
+              const count = allSchedulesByDate.get(key)?.length ?? 0;
+              const selected = key === activeDate;
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  aria-pressed={selected}
+                  aria-current={key === todayKey ? "date" : undefined}
+                  aria-label={`${key}, 일정 ${count}개`}
+                  onClick={() => setSelectedDate(key)}
+                  className={`min-h-14 rounded-xl flex flex-col items-center justify-center gap-1 border text-sm focus-visible:outline-2 focus-visible:outline-indigo-500 ${selected ? "bg-indigo-600 border-indigo-600 text-white" : "border-transparent hover:bg-gray-100 dark:hover:bg-slate-700 " + (cell.date.getDay() === 0 ? "text-red-500 dark:text-red-400" : cell.date.getDay() === 6 ? "text-blue-600 dark:text-blue-400" : "text-slate-800 dark:text-slate-100")}`}
+                >
+                  <span
+                    className={
+                      key === todayKey
+                        ? "font-bold underline underline-offset-4"
+                        : "font-medium"
+                    }
+                  >
+                    {cell.date.getDate()}
+                  </span>
+                  <span
+                    className={`text-[11px] ${selected ? "text-indigo-100" : "text-slate-500 dark:text-slate-400"}`}
+                  >
+                    {count ? `${count}개` : " "}
+                  </span>
+                </button>
+              );
+            })}
+        </div>
+        <section
+          className="mt-5 border-t border-slate-200 dark:border-slate-700 pt-4"
+          aria-label="선택한 날짜의 일정"
+        >
+          <div className="flex items-center justify-between gap-2 mb-3">
+            <h2
+              className="text-base font-semibold text-slate-900 dark:text-slate-100"
+              aria-live="polite"
+            >
+              {Number(activeDate.slice(5, 7))}월 {Number(activeDate.slice(8))}일{" "}
+              <span className="text-sm font-normal text-slate-500 dark:text-slate-400">
+                · {allSchedulesByDate.get(activeDate)?.length ?? 0}개
+              </span>
+            </h2>
+            <button
+              type="button"
+              onClick={() => onDateClick?.(activeDate)}
+              className="min-h-11 px-3 text-sm font-medium text-indigo-600 dark:text-indigo-300 rounded-lg hover:bg-indigo-50 dark:hover:bg-slate-700"
+            >
+              + 일정 추가
+            </button>
+          </div>
+          <div className="space-y-2">
+            {(allSchedulesByDate.get(activeDate) ?? []).map((schedule) => (
+              <button
+                key={schedule.id}
+                type="button"
+                onClick={() => onScheduleClick(schedule)}
+                className={`w-full text-left rounded-xl px-4 py-3 focus-visible:outline-2 focus-visible:outline-indigo-500 ${getCategoryClasses(schedule.category)}`}
+              >
+                <span className="block text-xs mb-1">
+                  {CATEGORY_LABEL_MAP[schedule.category ?? "OTHER"] ||
+                    (schedule.category === "HOLIDAY"
+                      ? "공휴일"
+                      : schedule.category === "PAYDAY"
+                        ? "월급날"
+                        : "기타")}{" "}
+                  · {schedule.time || "종일"}
+                  {schedule.endDate && schedule.endDate !== schedule.date && (
+                    <span className="whitespace-nowrap">
+                      {" "}
+                      (
+                      {schedule.date.slice(0, 4) !==
+                      schedule.endDate.slice(0, 4)
+                        ? `${schedule.date} ~ ${schedule.endDate}`
+                        : `${Number(schedule.date.slice(5, 7))}/${Number(schedule.date.slice(8))} ~ ${Number(schedule.endDate.slice(5, 7))}/${Number(schedule.endDate.slice(8))}`}
+                      )
+                    </span>
+                  )}
+                </span>
+                <span className="block text-base font-semibold break-words">
+                  {schedule.title}
+                </span>
+              </button>
+            ))}
+            {!allSchedulesByDate.get(activeDate)?.length && (
+              <p className="py-6 text-sm text-center text-slate-500 dark:text-slate-400">
+                등록된 일정이 없습니다. 새 일정을 추가해보세요.
+              </p>
+            )}
+          </div>
+        </section>
       </div>
     </div>
   );
