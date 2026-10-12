@@ -22,6 +22,10 @@ const CATEGORY_DISPLAY: Record<
     label: "오후반차",
     className: "bg-indigo-50 text-indigo-700 border border-indigo-200",
   },
+  BIRTHDAY_HALF: {
+    label: "생일반차",
+    className: "bg-pink-50 text-pink-700 border border-pink-200",
+  },
   IMPORTANT: {
     label: "중요",
     className: "bg-violet-50 text-violet-700 border border-violet-200",

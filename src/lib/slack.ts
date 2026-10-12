@@ -5,11 +5,14 @@ const SLACK_WEBHOOK_URL = process.env.SLACK_GENERAL_WEBHOOK_URL;
 
 type LeaveCategory = Extract<
   ScheduleCategory,
-  "DAY_OFF" | "AM_HALF" | "PM_HALF"
+  "DAY_OFF" | "AM_HALF" | "PM_HALF" | "BIRTHDAY_HALF"
 >;
 
 export const isLeaveCategory = (c: ScheduleCategory): c is LeaveCategory =>
-  c === "DAY_OFF" || c === "AM_HALF" || c === "PM_HALF";
+  c === "DAY_OFF" ||
+  c === "AM_HALF" ||
+  c === "PM_HALF" ||
+  c === "BIRTHDAY_HALF";
 
 // YYYY-MM-DD -> 2024. 3. 4(월)
 const formatKoreanDate = (ymd: string) => {
@@ -56,6 +59,7 @@ export async function notifySlackLeave(params: {
   let leaveLabel = "연차";
   if (params.category === "AM_HALF") leaveLabel = "오전 반차";
   if (params.category === "PM_HALF") leaveLabel = "오후 반차";
+  if (params.category === "BIRTHDAY_HALF") leaveLabel = "생일 반차";
 
   const text = `*${range}* ${leaveLabel} ${action}.\n업무에 참고 부탁드립니다 🙇‍♂️`;
 
@@ -91,6 +95,7 @@ const CATEGORY_LABEL: Record<ScheduleCategory, string> = {
   DAY_OFF: "연차",
   AM_HALF: "오전반차",
   PM_HALF: "오후반차",
+  BIRTHDAY_HALF: "생일반차",
   IMPORTANT: "중요",
   MEETING: "미팅",
   PAYDAY: "월급날",

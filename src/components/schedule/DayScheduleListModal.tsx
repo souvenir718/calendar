@@ -15,6 +15,7 @@ const CATEGORY_LABEL_MAP: Record<string, string> = {
   DAY_OFF: "연차",
   AM_HALF: "오전반차",
   PM_HALF: "오후반차",
+  BIRTHDAY_HALF: "생일반차",
   IMPORTANT: "중요",
   PAYDAY: "월급날",
   HOLIDAY: "공휴일",
@@ -29,6 +30,8 @@ const CATEGORY_CLASS_MAP: Record<string, string> = {
     "bg-sky-50 text-sky-700 border border-sky-200 dark:bg-sky-900/30 dark:text-sky-200 dark:border-sky-800",
   PM_HALF:
     "bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-200 dark:border-indigo-800",
+  BIRTHDAY_HALF:
+    "bg-pink-50 text-pink-700 border border-pink-200 dark:bg-pink-900/30 dark:text-pink-200 dark:border-pink-800",
   IMPORTANT:
     "bg-violet-50 text-violet-700 border border-violet-200 border-l-4 border-l-violet-500 dark:bg-violet-900/30 dark:text-violet-200 dark:border-violet-800 dark:border-l-violet-500",
   PAYDAY:

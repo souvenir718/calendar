@@ -20,6 +20,7 @@
   - `DAY_OFF`: 연차
   - `AM_HALF`: 오전 반차
   - `PM_HALF`: 오후 반차
+  - `BIRTHDAY_HALF`: 생일 반차
   - `HOLIDAY`: 공휴일
   - `IMPORTANT`: 중요 일정
   - `PAYDAY`: 급여일

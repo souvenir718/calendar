@@ -2,6 +2,7 @@ export type ScheduleCategory =
   | "DAY_OFF" // 연차(종일)
   | "AM_HALF" // 오전반차
   | "PM_HALF" // 오후반차
+  | "BIRTHDAY_HALF" // 생일반차
   | "MEETING"
   | "IMPORTANT"
   | "PAYDAY"

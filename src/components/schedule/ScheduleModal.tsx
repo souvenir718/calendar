@@ -10,6 +10,7 @@ const LEAVE_CATEGORIES: ReadonlySet<Schedule["category"]> = new Set([
   "DAY_OFF",
   "AM_HALF",
   "PM_HALF",
+  "BIRTHDAY_HALF",
 ]);
 
 export type ScheduleModalProps = {

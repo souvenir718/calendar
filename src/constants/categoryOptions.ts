@@ -8,6 +8,7 @@ export const CATEGORY_OPTIONS: {
   { value: "DAY_OFF", label: "연차 / 휴가" },
   { value: "AM_HALF", label: "오전 반차" },
   { value: "PM_HALF", label: "오후 반차" },
+  { value: "BIRTHDAY_HALF", label: "생일 반차" },
   { value: "MEETING", label: "미팅" },
   { value: "IMPORTANT", label: "중요" },
   { value: "PAYDAY", label: "월급날" },
