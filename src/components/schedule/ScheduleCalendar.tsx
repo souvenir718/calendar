@@ -463,7 +463,7 @@ export const ScheduleCalendar = memo(function ScheduleCalendar({
 
   return (
     <div
-      className="flex-1 min-h-0 flex flex-col gap-1.5 bg-white dark:bg-slate-800 w-full h-full"
+      className="flex-1 shrink-0 sm:shrink sm:min-h-0 flex flex-col gap-1.5 bg-white dark:bg-slate-800 w-full sm:h-full"
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}

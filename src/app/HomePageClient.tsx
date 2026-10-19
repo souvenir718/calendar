@@ -160,8 +160,8 @@ export function HomePageClient({
   }, []);
 
   return (
-    <main className="h-[100dvh] overflow-hidden flex flex-col pt-2 md:pt-5 md:pb-5 md:px-4 bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
-      <div className="max-w-6xl mx-auto w-full flex-1 flex flex-col min-h-0 overflow-y-auto pb-24 px-2 pt-2 md:pb-0 md:px-0 md:pt-0 md:overflow-hidden scrollbar-hide">
+    <main className="h-[100dvh] overflow-hidden flex flex-col pt-2 sm:pt-5 sm:pb-5 sm:px-4 bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
+      <div className="max-w-6xl mx-auto w-full flex-1 flex flex-col min-h-0 overflow-y-auto pb-24 px-2 pt-2 sm:pb-0 sm:px-0 sm:pt-0 sm:overflow-hidden scrollbar-hide">
         <header className="flex items-center justify-between mb-3 shrink-0">
           <div className="flex items-baseline gap-3">
             <h1 className="text-xl md:text-2xl font-semibold text-slate-900 dark:text-slate-100">
@@ -221,7 +221,7 @@ export function HomePageClient({
           </div>
         </header>
 
-        <section className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-2 md:p-3 flex-1 min-h-0 flex flex-col">
+        <section className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-2 md:p-3 flex-1 shrink-0 sm:shrink sm:min-h-0 flex flex-col">
           {isCalendarLoading ? (
             <ScheduleCalendarSkeleton />
           ) : isError ? (
