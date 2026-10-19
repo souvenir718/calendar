@@ -130,10 +130,15 @@ type WeekSegment = {
   continuesAfter: boolean;
 };
 
+const MAX_VISIBLE_SCHEDULE_ROWS = 3;
+const SCHEDULE_BAR_HEIGHT = 20;
+const SCHEDULE_BAR_GAP = 3;
+
 type WeekLayout = {
   barRows: number;
   segments: WeekSegment[];
-  reservedHeights: number[];
+  reservedRows: number[];
+  visibleMultiDayCounts: number[];
 };
 
 function getCategoryLabel(category?: string) {
@@ -318,7 +323,12 @@ export const ScheduleCalendar = memo(function ScheduleCalendar({
       const lastCol = week.findLastIndex((cell) => cell.date);
 
       if (firstCol === -1 || lastCol === -1) {
-        return { barRows: 0, segments: [], reservedHeights: Array(7).fill(0) };
+        return {
+          barRows: 0,
+          segments: [],
+          reservedRows: Array(7).fill(0),
+          visibleMultiDayCounts: Array(7).fill(0),
+        };
       }
 
       const weekStart = week[firstCol].date!;
@@ -385,8 +395,13 @@ export const ScheduleCalendar = memo(function ScheduleCalendar({
         };
       });
 
+      const visibleSegments = segments.filter(
+        (segment) => segment.row < MAX_VISIBLE_SCHEDULE_ROWS,
+      );
       const reservedRowsByColumn = Array<number>(7).fill(0);
-      for (const segment of segments) {
+      const visibleMultiDayCountByColumn = Array<number>(7).fill(0);
+
+      for (const segment of visibleSegments) {
         for (
           let column = segment.startCol;
           column <= segment.endCol;
@@ -396,15 +411,15 @@ export const ScheduleCalendar = memo(function ScheduleCalendar({
             reservedRowsByColumn[column],
             segment.row + 1,
           );
+          visibleMultiDayCountByColumn[column] += 1;
         }
       }
 
       return {
-        barRows: rowEndColumns.length,
-        segments,
-        reservedHeights: reservedRowsByColumn.map((rows) =>
-          rows > 0 ? rows * 22 + (rows - 1) * 4 + 4 : 0,
-        ),
+        barRows: Math.min(rowEndColumns.length, MAX_VISIBLE_SCHEDULE_ROWS),
+        segments: visibleSegments,
+        reservedRows: reservedRowsByColumn,
+        visibleMultiDayCounts: visibleMultiDayCountByColumn,
       };
     });
   }, [multiDaySchedules, weeks]);
@@ -448,12 +463,12 @@ export const ScheduleCalendar = memo(function ScheduleCalendar({
 
   return (
     <div
-      className="flex flex-col gap-2 bg-white dark:bg-slate-800 w-full h-full"
+      className="flex-1 min-h-0 flex flex-col gap-1.5 bg-white dark:bg-slate-800 w-full h-full"
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
     >
-      <div className="flex items-center justify-between mb-2 gap-2">
+      <div className="flex items-center justify-between mb-1 gap-2 shrink-0">
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -487,7 +502,7 @@ export const ScheduleCalendar = memo(function ScheduleCalendar({
         <div className="w-16" />
       </div>
 
-      <div className="grid grid-cols-7 text-center text-[11px] text-gray-500 dark:text-gray-400 mb-1 border-b border-gray-200 dark:border-slate-700 pb-1">
+      <div className="grid grid-cols-7 text-center text-[11px] text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-slate-700 pb-1 shrink-0">
         {weekDays.map((day, index) => {
           const isSunday = index === 0;
           const isSaturday = index === 6;
@@ -509,7 +524,7 @@ export const ScheduleCalendar = memo(function ScheduleCalendar({
         })}
       </div>
 
-      <div className="hidden sm:grid flex-1 grid-rows-6 gap-[2px] text-[11px] bg-gray-200 dark:bg-slate-700 border border-gray-200 dark:border-slate-700 rounded-md overflow-hidden min-h-[540px] md:min-h-[600px]">
+      <div className="hidden sm:grid flex-1 min-h-0 grid-rows-6 gap-[2px] text-[11px] bg-gray-200 dark:bg-slate-700 border border-gray-200 dark:border-slate-700 rounded-md overflow-hidden">
         {weeks.map((week, weekIndex) => {
           const layout = weekLayouts[weekIndex];
 
@@ -531,6 +546,30 @@ export const ScheduleCalendar = memo(function ScheduleCalendar({
                 const dateKey = cell.key;
                 const allDaySchedules = allSchedulesByDate.get(dateKey) ?? [];
                 const listSchedules = listSchedulesByDate.get(dateKey) ?? [];
+                const reservedRows = layout.reservedRows[dayIndex];
+                const maxSingleCount = Math.max(
+                  0,
+                  MAX_VISIBLE_SCHEDULE_ROWS - reservedRows,
+                );
+                const visibleListSchedules = listSchedules.slice(
+                  0,
+                  maxSingleCount,
+                );
+                const visibleCount =
+                  layout.visibleMultiDayCounts[dayIndex] +
+                  visibleListSchedules.length;
+                const hiddenCount = Math.max(
+                  0,
+                  allDaySchedules.length - visibleCount,
+                );
+                const hasContentBelowMultiDay =
+                  visibleListSchedules.length > 0 || hiddenCount > 0;
+                const reservedHeight =
+                  reservedRows > 0
+                    ? reservedRows * SCHEDULE_BAR_HEIGHT +
+                      (reservedRows - 1) * SCHEDULE_BAR_GAP +
+                      (hasContentBelowMultiDay ? SCHEDULE_BAR_GAP : 0)
+                    : 0;
                 const isToday =
                   today !== null &&
                   cell.date.getFullYear() === today.year &&
@@ -540,7 +579,7 @@ export const ScheduleCalendar = memo(function ScheduleCalendar({
                 return (
                   <div
                     key={`${weekIndex}-${dayIndex}`}
-                    className="relative min-h-0 bg-white dark:bg-slate-800 flex flex-col p-1 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors"
+                    className="relative min-h-0 bg-white dark:bg-slate-800 flex flex-col p-1 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors overflow-hidden"
                   >
                     <button
                       type="button"
@@ -579,21 +618,21 @@ export const ScheduleCalendar = memo(function ScheduleCalendar({
                       )}
                     </div>
 
-                    {layout.reservedHeights[dayIndex] > 0 && (
+                    {reservedHeight > 0 && (
                       <div
                         className="shrink-0"
                         style={{
-                          height: `${layout.reservedHeights[dayIndex]}px`,
+                          height: `${reservedHeight}px`,
                         }}
                       />
                     )}
 
-                    <div className="relative pointer-events-none hidden sm:block flex-1 space-y-1 overflow-hidden">
-                      {listSchedules.slice(0, 3).map((schedule) => (
+                    <div className="relative pointer-events-none hidden sm:block flex-1 min-h-0 space-y-[3px] overflow-hidden">
+                      {visibleListSchedules.map((schedule) => (
                         <button
                           type="button"
                           key={schedule.id}
-                          className={`pointer-events-auto w-full text-left rounded px-1 py-[2px] flex items-start justify-between gap-1 cursor-pointer ${getCategoryClasses(
+                          className={`pointer-events-auto w-full h-5 text-left rounded px-1 flex items-center justify-between gap-1 cursor-pointer ${getCategoryClasses(
                             schedule.category,
                           )}`}
                           onClick={(event) => {
@@ -601,9 +640,9 @@ export const ScheduleCalendar = memo(function ScheduleCalendar({
                             onScheduleClick(schedule);
                           }}
                         >
-                          <div className="flex-1">
-                            <div className="truncate">
-                              <span className="text-[11px] font-semibold">
+                          <div className="flex-1 min-w-0">
+                            <div className="truncate leading-none">
+                              <span className="text-[11px] font-semibold leading-none">
                                 {getCategoryLabel(schedule.category)}
                                 {schedule.title}
                               </span>
@@ -611,10 +650,17 @@ export const ScheduleCalendar = memo(function ScheduleCalendar({
                           </div>
                         </button>
                       ))}
-                      {listSchedules.length > 3 && (
-                        <div className="text-[10px] text-gray-500 dark:text-gray-400">
-                          + {listSchedules.length - 3}개 더
-                        </div>
+                      {hiddenCount > 0 && (
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            onDateCountClick?.(dateKey);
+                          }}
+                          className="pointer-events-auto block text-left text-[10px] leading-none pt-0.5 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 font-medium cursor-pointer"
+                        >
+                          + {hiddenCount}개 더
+                        </button>
                       )}
                     </div>
                   </div>
@@ -623,15 +669,15 @@ export const ScheduleCalendar = memo(function ScheduleCalendar({
 
               {layout.segments.length > 0 && (
                 <div
-                  className="absolute inset-x-0 top-6 sm:top-7 grid grid-cols-7 gap-[2px] pointer-events-none"
-                  style={{ gridAutoRows: "22px" }}
+                  className="absolute inset-x-0 top-[26px] sm:top-[30px] grid grid-cols-7 gap-x-[2px] gap-y-[3px] pointer-events-none"
+                  style={{ gridAutoRows: `${SCHEDULE_BAR_HEIGHT}px` }}
                 >
                   {layout.segments.map((segment) => (
                     <button
                       key={`segment-${weekIndex}-${segment.schedule.id}`}
                       type="button"
                       onClick={() => onScheduleClick(segment.schedule)}
-                      className={`pointer-events-auto h-[22px] px-1 py-[2px] text-left text-[10px] sm:text-[11px] font-semibold truncate ${
+                      className={`pointer-events-auto h-5 px-1 flex items-center text-left text-[10px] sm:text-[11px] font-semibold leading-none truncate ${
                         !segment.continuesBefore ? "ml-1" : ""
                       } ${!segment.continuesAfter ? "mr-1" : ""} ${getSpanBarClasses(
                         segment.schedule.category,
@@ -643,8 +689,10 @@ export const ScheduleCalendar = memo(function ScheduleCalendar({
                         gridRow: segment.row + 1,
                       }}
                     >
-                      {getCategoryLabel(segment.schedule.category)}
-                      {segment.schedule.title}
+                      <span className="truncate">
+                        {getCategoryLabel(segment.schedule.category)}
+                        {segment.schedule.title}
+                      </span>
                     </button>
                   ))}
                 </div>

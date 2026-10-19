@@ -1,8 +1,8 @@
 export function ScheduleCalendarSkeleton() {
     return (
-        <div className="flex flex-col gap-2 bg-white dark:bg-slate-800 animate-pulse">
+        <div className="flex-1 min-h-0 flex flex-col gap-1.5 bg-white dark:bg-slate-800 animate-pulse">
             {/* 달력 헤더 스켈레톤 */}
-            <div className="flex items-center justify-between mb-2 gap-2">
+            <div className="flex items-center justify-between mb-1 gap-2 shrink-0">
                 <div className="flex items-center gap-2">
                     <div className="w-12 h-6 bg-gray-200 dark:bg-slate-700 rounded-full" />
                 </div>
@@ -15,7 +15,7 @@ export function ScheduleCalendarSkeleton() {
             </div>
 
             {/* 요일 헤더 스켈레톤 */}
-            <div className="grid grid-cols-7 text-center mb-1 border-b border-gray-200 dark:border-slate-700 pb-1">
+            <div className="grid grid-cols-7 text-center border-b border-gray-200 dark:border-slate-700 pb-1 shrink-0">
                 {[...Array(7)].map((_, i) => (
                     <div key={i} className="flex justify-center py-1">
                         <div className="w-4 h-4 bg-gray-200 dark:bg-slate-700 rounded" />
@@ -24,12 +24,12 @@ export function ScheduleCalendarSkeleton() {
             </div>
 
             {/* 달력 바디 스켈레톤 (6주 고정) */}
-            <div className="grid grid-cols-7 gap-[2px] bg-gray-200 dark:bg-slate-700 border border-gray-200 dark:border-slate-700 rounded-md overflow-hidden">
+            <div className="flex-1 min-h-0 grid grid-cols-7 grid-rows-6 gap-[2px] bg-gray-200 dark:bg-slate-700 border border-gray-200 dark:border-slate-700 rounded-md overflow-hidden">
                 {[...Array(6)].map((_, weekIndex) =>
                     [...Array(7)].map((_, dayIndex) => (
                         <div
                             key={`${weekIndex}-${dayIndex}`}
-                            className="min-h-[64px] sm:min-h-[72px] md:min-h-[96px] lg:min-h-[110px] bg-white dark:bg-slate-800 p-1"
+                            className="min-h-0 bg-white dark:bg-slate-800 p-1"
                         >
                             {/* 날짜 숫자 위치 홀더 */}
                             <div className="flex justify-between mb-1">
