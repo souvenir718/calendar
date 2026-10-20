@@ -1,6 +1,6 @@
 export function ScheduleCalendarSkeleton() {
     return (
-        <div className="flex-1 sm:min-h-0 flex flex-col gap-1.5 bg-white dark:bg-slate-800 animate-pulse">
+        <div className="flex-1 min-h-0 flex flex-col gap-1.5 bg-white dark:bg-slate-800 animate-pulse">
             {/* 달력 헤더 스켈레톤 */}
             <div className="flex items-center justify-between mb-1 gap-2 shrink-0">
                 <div className="flex items-center gap-2">

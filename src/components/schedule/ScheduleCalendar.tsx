@@ -235,8 +235,12 @@ export const ScheduleCalendar = memo(function ScheduleCalendar({
     : todayKey?.startsWith(monthPrefix + "-")
       ? todayKey
       : `${monthPrefix}-01`;
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(
+    null,
+  );
+  const [touchEnd, setTouchEnd] = useState<{ x: number; y: number } | null>(
+    null,
+  );
 
   const weeks = useMemo(() => {
     const firstDay = new Date(year, monthIndex, 1);
@@ -441,33 +445,40 @@ export const ScheduleCalendar = memo(function ScheduleCalendar({
 
   const onTouchStart = (event: React.TouchEvent) => {
     setTouchEnd(null);
-    setTouchStart(event.targetTouches[0].clientX);
+    setTouchStart({
+      x: event.targetTouches[0].clientX,
+      y: event.targetTouches[0].clientY,
+    });
   };
 
   const onTouchMove = (event: React.TouchEvent) => {
-    setTouchEnd(event.targetTouches[0].clientX);
+    setTouchEnd({
+      x: event.targetTouches[0].clientX,
+      y: event.targetTouches[0].clientY,
+    });
   };
 
   const onTouchEnd = () => {
     if (!touchStart || !touchEnd) return;
     if (window.innerWidth >= 640) return;
 
-    const distance = touchStart - touchEnd;
-    if (distance > minSwipeDistance) {
-      changeMonth(1);
-    }
-    if (distance < -minSwipeDistance) {
-      changeMonth(-1);
+    const distanceX = touchStart.x - touchEnd.x;
+    const distanceY = touchStart.y - touchEnd.y;
+
+    if (
+      Math.abs(distanceX) > minSwipeDistance &&
+      Math.abs(distanceX) > Math.abs(distanceY) * 1.5
+    ) {
+      if (distanceX > 0) {
+        changeMonth(1);
+      } else {
+        changeMonth(-1);
+      }
     }
   };
 
   return (
-    <div
-      className="flex-1 shrink-0 sm:shrink sm:min-h-0 flex flex-col gap-1.5 bg-white dark:bg-slate-800 w-full sm:h-full"
-      onTouchStart={onTouchStart}
-      onTouchMove={onTouchMove}
-      onTouchEnd={onTouchEnd}
-    >
+    <div className="flex-1 min-h-0 flex flex-col gap-1.5 bg-white dark:bg-slate-800 w-full h-full">
       <div className="flex items-center justify-between mb-1 gap-2 shrink-0">
         <div className="flex items-center gap-2">
           <button
@@ -701,8 +712,14 @@ export const ScheduleCalendar = memo(function ScheduleCalendar({
           );
         })}
       </div>
-      <div className="sm:hidden">
-        <div className="grid grid-cols-7 gap-1" aria-label="날짜 선택">
+      <div className="sm:hidden flex-1 min-h-0 flex flex-col">
+        <div
+          className="grid grid-cols-7 gap-1 shrink-0"
+          aria-label="날짜 선택"
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+        >
           {weeks
             .filter((week) => week.some((cell) => cell.date))
             .flat()
@@ -720,7 +737,7 @@ export const ScheduleCalendar = memo(function ScheduleCalendar({
                   aria-current={key === todayKey ? "date" : undefined}
                   aria-label={`${key}, 일정 ${count}개`}
                   onClick={() => setSelectedDate(key)}
-                  className={`min-h-14 rounded-xl flex flex-col items-center justify-center gap-1 border text-sm focus-visible:outline-2 focus-visible:outline-indigo-500 ${selected ? "bg-indigo-600 border-indigo-600 text-white" : "border-transparent hover:bg-gray-100 dark:hover:bg-slate-700 " + (cell.date.getDay() === 0 ? "text-red-500 dark:text-red-400" : cell.date.getDay() === 6 ? "text-blue-600 dark:text-blue-400" : "text-slate-800 dark:text-slate-100")}`}
+                  className={`min-h-11 rounded-xl flex flex-col items-center justify-center gap-0.5 border text-sm focus-visible:outline-2 focus-visible:outline-indigo-500 ${selected ? "bg-indigo-600 border-indigo-600 text-white" : "border-transparent hover:bg-gray-100 dark:hover:bg-slate-700 " + (cell.date.getDay() === 0 ? "text-red-500 dark:text-red-400" : cell.date.getDay() === 6 ? "text-blue-600 dark:text-blue-400" : "text-slate-800 dark:text-slate-100")}`}
                 >
                   <span
                     className={
@@ -732,7 +749,7 @@ export const ScheduleCalendar = memo(function ScheduleCalendar({
                     {cell.date.getDate()}
                   </span>
                   <span
-                    className={`text-[11px] ${selected ? "text-indigo-100" : "text-slate-500 dark:text-slate-400"}`}
+                    className={`text-[11px] leading-tight ${selected ? "text-indigo-100" : "text-slate-500 dark:text-slate-400"}`}
                   >
                     {count ? `${count}개` : " "}
                   </span>
@@ -741,10 +758,10 @@ export const ScheduleCalendar = memo(function ScheduleCalendar({
             })}
         </div>
         <section
-          className="mt-5 border-t border-slate-200 dark:border-slate-700 pt-4"
+          className="mt-3 border-t border-slate-200 dark:border-slate-700 pt-3 flex-1 min-h-0 flex flex-col"
           aria-label="선택한 날짜의 일정"
         >
-          <div className="flex items-center justify-between gap-2 mb-3">
+          <div className="flex items-center justify-between gap-2 mb-2 shrink-0">
             <h2
               className="text-base font-semibold text-slate-900 dark:text-slate-100"
               aria-live="polite"
@@ -757,12 +774,12 @@ export const ScheduleCalendar = memo(function ScheduleCalendar({
             <button
               type="button"
               onClick={() => onDateClick?.(activeDate)}
-              className="min-h-11 px-3 text-sm font-medium text-indigo-600 dark:text-indigo-300 rounded-lg hover:bg-indigo-50 dark:hover:bg-slate-700"
+              className="min-h-9 px-3 text-sm font-medium text-indigo-600 dark:text-indigo-300 rounded-lg hover:bg-indigo-50 dark:hover:bg-slate-700"
             >
               + 일정 추가
             </button>
           </div>
-          <div className="space-y-2">
+          <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain space-y-2 pb-1">
             {(allSchedulesByDate.get(activeDate) ?? []).map((schedule) => (
               <button
                 key={schedule.id}
